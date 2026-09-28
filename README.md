@@ -1,5 +1,7 @@
 # 简历工作台
 
+[GitHub](https://github.com/jkevin39/resume-produce) · [Download ZIP](https://github.com/jkevin39/resume-produce/archive/refs/heads/main.zip)
+
 把履历材料整理成可复用的经历与证据，再根据职位描述生成、编辑和导出中文简历。
 
 这是 **macOS 本地单用户源码预览版**。下载后在自己的电脑上运行，模型 API Key 由使用者自行配置。当前功能基于 v0.11.1；完整模型质量矩阵与部分原生应用人工验收仍在进行，详见 [项目状态](PROJECT_TRACKER.md)。
