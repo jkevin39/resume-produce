@@ -1,0 +1,7 @@
+{
+  "files_checked": 127,
+  "private_markers_checked": 3,
+  "findings": [],
+  "scope": "Exact private profile markers and photo; common credential patterns; local absolute paths. Not an exhaustive security audit.",
+  "synthetic_phone": "Shared placeholder excluded after comparison with synthetic fixture."
+}

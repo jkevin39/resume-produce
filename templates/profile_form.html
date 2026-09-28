@@ -1,0 +1,33 @@
+{% macro education_row(item, index) %}
+<fieldset class="education-row" data-original-index="{{ index }}">
+  <legend>教育经历</legend>
+  <div class="grid">
+    <label>学校<input type="text" data-field="school" value="{{ item.get('school', '') }}" placeholder="学校名称"></label>
+    <label>学历 / 学位<input type="text" data-field="degree" value="{{ item.get('degree', '') }}" placeholder="例如：本科 / 硕士"></label>
+    <label>专业<input type="text" data-field="major" value="{{ item.get('major', '') }}"></label>
+    <label>在校时间<input type="text" data-field="date" value="{{ item.get('date', '') }}" placeholder="例如：2023.09–2027.06"></label>
+  </div>
+  <label>补充说明<textarea data-field="details" rows="2" placeholder="相关课程、荣誉等（选填）">{{ item.get('details', '') }}</textarea></label>
+  <button type="button" class="danger compact" data-remove-education>删除这段教育经历</button>
+</fieldset>
+{% endmacro %}
+<p class="muted">先保存基本信息，再生成简历。这里保存到履历库；已打开的草稿和已保存简历不会自动改变。</p>
+<form id="profile-form" action="{{ url_for('save_profile_details') }}" method="post">
+    <fieldset id="profile-fields" class="profile-fields">
+      <div class="grid">
+        <label>姓名<input type="text" name="name" autocomplete="name" value="{{ profile.profile.get('name', '') }}"></label>
+        <label>意向城市<input type="text" name="location" value="{{ profile.profile.get('location', '') }}" placeholder="例如：上海、杭州"></label>
+        <label>电话<input type="tel" name="phone" autocomplete="tel" value="{{ profile.profile.get('phone', '') }}"></label>
+        <label>邮箱<input type="email" name="email" autocomplete="email" value="{{ profile.profile.get('email', '') }}"></label>
+      </div>
+      <label>个人简介（选填）<textarea name="summary" rows="2">{{ profile.profile.get('summary', '') }}</textarea></label>
+      <div class="profile-edu-head"><h3>教育经历</h3><button type="button" class="secondary compact" id="add-education">添加教育经历</button></div>
+      <div id="education-rows">
+        {% for item in profile.get('education', []) %}{{ education_row(item, loop.index0) }}{% else %}{{ education_row({}, '') }}{% endfor %}
+      </div>
+    </fieldset>
+    <div class="button-row"><button type="submit" id="save-profile">保存基本信息与教育经历</button></div>
+    <p id="profile-status" role="status" aria-live="polite"></p>
+  </form>
+  <template id="education-template">{{ education_row({}, '') }}</template>
+<script defer src="{{ url_for('static', filename='js/profile-form.js') }}"></script>

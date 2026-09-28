@@ -1,0 +1,23 @@
+{# JD 四类分析 + 缺口与关键词覆盖双卡片。入参：analysis、match_report。prepare 页与草稿编辑页共用，保证两处渲染一致。 #}
+<div class="grid">
+  <section class="card"><h2>JD 四类分析</h2>
+    {% for key, title in [('required','必备条件'),('preferred','加分条件'),('responsibilities','工作职责'),('technical_keywords','技术关键词')] %}<h3>{{ title }}</h3><ul>{% for item in analysis.get(key, []) %}<li>{{ item }}</li>{% else %}<li class="muted">无明确内容</li>{% endfor %}</ul>{% endfor %}
+    {% if analysis.inferred_preferences %}<h3>推测偏好（仅辅助排序）</h3><ul>{% for item in analysis.inferred_preferences %}<li>{{ item.text }}</li>{% endfor %}</ul>{% endif %}
+  </section>
+  <section class="card"><h2>缺口与关键词覆盖</h2>
+    <h3>关键词覆盖</h3>
+    <p>{% for kw in match_report.keyword_coverage %}<span class="badge strong">{{ kw }}</span> {% else %}<span class="muted">暂无</span>{% endfor %}</p>
+    <h3>教育背景匹配</h3>
+    {% if 'education_matches' not in match_report %}<p class="muted">本轮未评估教育背景</p>
+    {% else %}
+      {% for item in match_report.education_matches %}
+      <div class="gap-item"><strong>{{ item.requirement }}</strong>
+        <span class="badge {{ 'strong' if item.status == 'met' else 'partial' }}">{{ {'met':'已满足','unmet':'不满足','needs_confirmation':'待核实'}.get(item.status, '待核实') }}</span><br>{{ item.reason }}</div>
+      {% else %}<p class="muted">JD 未提出明确教育条件</p>{% endfor %}
+    {% endif %}
+    <p class="muted">教育资料如有修改，请重新分析 JD。</p>
+    <h3>其他缺口</h3>
+    {% set education_requirements = match_report.get('education_matches', []) | map(attribute='requirement') | list %}
+    {% for gap in match_report.gaps if gap.requirement not in education_requirements %}<div class="gap-item"><strong>{{ gap.requirement }}</strong><br><span class="muted">{{ gap.suggestion }}</span></div>{% else %}<p class="muted">未发现明确缺口</p>{% endfor %}
+  </section>
+</div>

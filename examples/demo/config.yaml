@@ -1,0 +1,13 @@
+llm:
+  # demo 使用本地规则；live 使用下方服务商，密钥仅从环境或钥匙串加载。
+  mode: "demo"
+  provider: "deepseek"
+  thinking: false
+  model: "deepseek-flash"
+  timeout_seconds: 90
+  max_tokens: 8192
+
+app:
+  host: "127.0.0.1"
+  port: 5000
+  debug: false

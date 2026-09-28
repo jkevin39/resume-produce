@@ -1,0 +1,13 @@
+profile:
+  name: 测试用户
+  phone: "13800000000"
+  email: test@example.com
+  location: 上海
+  summary: 关注数据产品与可靠自动化。
+education:
+  - education_id: edu_test_001
+    school: 测试大学
+    degree: 本科
+    major: 信息管理
+    date: 2023.09–2027.06
+    details: ""

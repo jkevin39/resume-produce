@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="container">
+  <p class="notice notice-slim runtime-line">当前运行模式：<strong>{{ runtime_label }}</strong>。</p>
+  <p id="model-key-warning" class="notice" {% if not key_missing %}hidden{% endif %}>尚未配置模型密钥。历史查看、续编、编辑和打印仍可使用；需要生成时，请先运行"配置模型密钥.command"，然后重启服务。</p>
+
+  {% include "_model_settings.html" %}
+  <div class="grid">
+    <section class="card material-card">
+      <h2>履历材料</h2>
+      <p class="muted">新建时请明确：实习经历——公司、岗位、时间、地点；项目经历——项目名称、角色、时间、地点；技能——技能名称、文字描述。一次导入一个对象。</p>
+      <form method="post" id="material-import-form" data-loading-text="正在拆解材料并写入履历库，请稍候。" action="{{ url_for('import_profile') }}" enctype="multipart/form-data">
+        <label for="source_text">材料正文</label><textarea id="source_text" name="source_text" placeholder="示例：某公司 数据分析实习生&#10;- 使用 Python 清洗 2 万条反馈……"></textarea>
+        {% with ocr_kind="material" %}{% include "_jd_ocr.html" %}{% endwith %}
+        <label for="source_file">或选择文件</label><input id="source_file" type="file" name="source_file" accept=".txt,.md,.markdown,.yaml,.yml">
+        <label for="target-object">选择追加对象</label><select id="target-object" name="target_object">{% include "_material_options.html" %}</select>
+        <p class="muted">默认新建；选择已有对象则追加。追加经历不自动去重，可在履历库编辑或删除重复证据。</p>
+        <p><button type="submit">拆解并写入履历库</button></p>
+      </form>
+      <form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data">
+        <label for="photo">证件照（JPEG / PNG）</label><div class="inline-form"><input id="photo" type="file" name="photo" accept="image/jpeg,image/png"><button type="submit">保存照片</button></div>
+      </form>
+    </section>
+    <section class="card jd-card">
+      <h2>针对 JD 生成</h2>
+      <form method="post" data-model-form data-loading-text="正在分析 JD、匹配证据并生成技能描述，通常需要几十秒。" action="{{ url_for('prepare') }}" enctype="multipart/form-data">
+        <div class="grid"><div><label>公司</label><input type="text" name="company" required></div><div><label>岗位</label><input type="text" name="role" required></div></div>
+        <label for="jd_text">JD 文本（支持英文输入，输出中文）</label><textarea id="jd_text" name="jd_text"></textarea>
+        {% include "_jd_ocr.html" %}
+        <label>或上传 JD 文件（TXT / Markdown）</label><input type="file" name="jd_file" accept=".txt,.md,.markdown">
+        <p class="muted">第一版只生成中文简历。填写 JD 正文或选择文件即可。</p>
+        <p><button type="submit">分析 JD 并匹配证据</button></p>
+      </form>
+    </section>
+  </div>
+
+  <details class="card collapsible" id="basic-info" data-collapsible="basic-info" {% if not experiences %}open{% endif %}>
+    <summary><h2>我的基本信息</h2><span class="muted collapsible-summary" data-profile-name-summary>{{ profile.profile.name or '姓名待填写' }}{% if profile.profile.location %} · {{ profile.profile.location }}{% endif %}{% if not experiences %} · 首次使用请先填写{% endif %}</span></summary>
+    <div class="collapsible-body">{% include "profile_form.html" %}</div>
+  </details>
+
+  <details class="card collapsible" data-collapsible="library">
+    <summary><h2>履历库</h2><span class="muted collapsible-summary" id="library-summary">{% include "_library_summary.html" %}</span></summary>
+    <div class="collapsible-body" id="library-body">
+      {% include "_library_body.html" %}
+    </div>
+  </details>
+
+<div id="library-trash">{% include "_library_trash.html" %}</div>
+</main>
+<script defer src="{{ url_for('static', filename='js/library-edit.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/evidence-status.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/material-import.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/generation-name.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/jd-ocr.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/model-settings.js') }}"></script>
+{% endblock %}

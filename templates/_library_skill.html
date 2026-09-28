@@ -1,0 +1,19 @@
+<details class="collapsible collapsible-sub" data-collapsible="skill:{{ item.name }}">
+  <summary><strong>{{ item.name }}</strong>{% if item.description %}<span class="muted collapsible-summary">，{{ item.description }}</span>{% endif %}</summary>
+  <div class="collapsible-body">
+    <p class="skill-origin"><span class="badge {{ 'confirmed' if item.user_confirmed else 'partial' }}">{{ '用户已确认' if item.user_confirmed else '由关联证据支持' }}</span></p>
+    {% if item.evidence_ids %}<ul class="skill-evidence-list">{% for eid in item.evidence_ids %}<li>{{ evidence[eid].original_fact if eid in evidence else '来源暂不可用' }} <small>{{ eid }}</small></li>{% endfor %}</ul>{% endif %}
+    <div class="experience-tools">
+      <details class="experience-edit"><summary>编辑技能描述</summary>
+        <form method="post" action="{{ url_for('library_edit') }}" data-library-form>
+          <input type="hidden" name="kind" value="skill"><input type="hidden" name="identifier" value="{{ item.name }}">
+          <label>技能描述<textarea name="description">{{ item.description or '' }}</textarea></label>
+          <button type="submit" class="compact">保存描述</button><small data-library-status role="status"></small>
+        </form>
+      </details>
+      <form method="post" action="{{ url_for('library_delete') }}" data-library-form data-confirm="移入回收站，可在回收站恢复；已生成简历不受影响。">
+        <input type="hidden" name="kind" value="skill"><input type="hidden" name="identifier" value="{{ item.name }}"><button class="secondary compact" type="submit">删除技能</button><small data-library-status role="status"></small>
+      </form>
+    </div>
+  </div>
+</details>

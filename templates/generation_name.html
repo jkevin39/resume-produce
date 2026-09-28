@@ -1,0 +1,11 @@
+<span class="generation-name" data-generation-name data-generation-id="{{ generation_id }}" data-url="{{ url_for('rename_generation', generation_id=generation_id) }}">
+  <button type="button" class="name-trigger" aria-expanded="false" title="点击改名">{{ display_name }}</button>
+  <small class="muted" data-name-id {% if display_name == generation_id %}hidden{% endif %}>{{ generation_id }}</small>
+  <span data-name-actions hidden><button type="button" class="secondary" data-rename>改名</button></span>
+  <span data-name-editor hidden>
+    <input type="text" aria-label="快照名称" value="{{ display_name }}">
+    <button type="button" data-name-save>保存名称</button>
+    <button type="button" class="secondary" data-name-cancel>取消</button>
+  </span>
+  <small data-name-status role="status"></small>
+</span>

@@ -1,0 +1,18 @@
+experience_id: project_001
+type: project
+organization: 测试知识助手
+title: 产品与开发负责人
+date: 2025.09–2025.12
+location: ""
+source_refs: [sources/test-profile.md]
+evidence:
+  - evidence_id: ev_rag_001
+    original_fact: 基于 Python 和大模型 API 完成问答原型，并组织 12 名同学试用。
+    structured_fact:
+      action: 完成问答原型并组织试用
+      method: Python、大模型 API
+      scale: 12 名试用者
+      result: 收集可用性反馈
+      skills: [Python, LLM, 产品设计]
+    candidate_zh: 基于 Python 与大模型 API 搭建问答原型，组织 12 名同学试用并收集反馈。
+    status: confirmed

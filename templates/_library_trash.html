@@ -1,0 +1,12 @@
+<details class="card collapsible" data-collapsible="trash">
+  <summary><h2>回收站</h2> <span class="muted">{{ trash|length }} 项</span></summary>
+  <div class="collapsible-body">{% for record in trash %}
+    <div class="trash-row"><span class="badge">{{ {'evidence':'证据','skill':'技能','experience':'经历'}[record.kind] }}</span>
+      <span class="trash-summary">{{ (record.payload.original_fact if record.kind == 'evidence' else record.payload.name if record.kind == 'skill' else record.payload.organization)[:90] }}</span>
+      {% if record.kind == 'evidence' and record.origin_label %}<small class="trash-origin">来自 {{ record.origin_label }}</small>{% endif %}
+      <small class="trash-time">{{ record.deleted_at|display_time }}</small>
+      <span class="trash-actions"><form class="inline-form" method="post" action="{{ url_for('library_trash', trash_id=record.trash_id, action='restore') }}" data-library-form><button class="secondary compact">恢复</button><small data-library-status role="status"></small></form>
+      <form class="inline-form" method="post" action="{{ url_for('library_trash', trash_id=record.trash_id, action='purge') }}" data-library-form data-confirm="彻底删除后不可恢复，确定继续？"><button class="secondary compact">彻底删除</button><small data-library-status role="status"></small></form></span>
+    </div>{% else %}<p class="muted">回收站为空。</p>{% endfor %}
+  </div>
+</details>

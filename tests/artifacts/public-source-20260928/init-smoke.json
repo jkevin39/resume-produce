@@ -1,0 +1,8 @@
+{
+  "blank_init": "passed",
+  "demo_init": "passed",
+  "existing_data_preserved": "passed",
+  "homepage_checks": 2,
+  "api_calls": 0,
+  "retained_extra_html": 0
+}

@@ -1,0 +1,54 @@
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: #eef1f5; color: #20242b; font-family: "Songti SC", "STSong", "SimSun", serif; }
+.resume-page {
+  width: 210mm; min-height: 297mm; height: 297mm; margin: 18px auto; padding: 14mm 16mm;
+  background: #fff; box-shadow: 0 8px 28px rgba(23, 32, 48, .15); overflow: visible;
+  font-size: var(--resume-font-size, 10.5pt); line-height: var(--resume-line-height, 1.42); padding: var(--resume-padding, 14mm 16mm); --accent: #185d9d;
+}
+.theme-charcoal { --accent: #303640; }
+.theme-green { --accent: #18705a; }
+.resume-header { display: grid; grid-template-columns: minmax(0, 1fr) var(--photo-width); gap: 8mm; align-items: start; break-inside: avoid; }
+.header-content, .entry, .editable-item { position: relative; }
+.resume-header.no-photo { grid-template-columns: 1fr; gap: 0; }
+.resume-header h1 { margin: 0 0 2.5mm; color: var(--accent); font-size: 24pt; letter-spacing: .04em; }
+.contact-info { display: flex; flex-wrap: wrap; gap: 2mm 5mm; color: #4c5563; }
+.summary { margin: 3mm 0 0; }
+.profile-photo { width: var(--photo-width); height: var(--photo-height); object-fit: cover; object-position: var(--photo-position); display: block; border-radius: 2px; }
+.profile-photo.is-hidden { display: none; }
+.resume-section { margin-top: var(--section-gap, 4.2mm); }
+.resume-section h2 { margin: 0 0 2mm; padding-bottom: 1mm; color: var(--accent); border-bottom: 1.2px solid var(--accent); font-size: 13pt; }
+.entry { margin: 0 0 2.6mm; break-inside: avoid; }
+.density-compact .entry { margin-bottom: 1.6mm; }
+.entry-heading, .entry-sub { display: flex; justify-content: space-between; gap: 8mm; }
+.entry-sub { color: #596273; font-size: .95em; }
+ul { margin: 1mm 0 0; padding-left: 5mm; }
+li { margin: var(--bullet-gap, .7mm) 0; padding-left: .5mm; }
+.skills-line { margin: 0; }
+.skills-list { margin-top: 1mm; }
+.skill-item { position: relative; }
+.skill-content { display: inline; }
+.skill-description-wrap { display: inline; }
+[data-placeholder]:empty::before { content: attr(data-placeholder); color: #687386; }
+[data-placeholder]:focus::before { content: ""; }
+.resume-text { white-space: pre-line; }
+[contenteditable="true"] { border-radius: 2px; outline: none; }
+[contenteditable="true"]:focus { background: #fff5bf; box-shadow: 0 0 0 2px #f2d562; }
+.optional-line:has(> .resume-text:empty) { display: none; }
+.editable-page .optional-line:has(> .resume-text:empty) {
+  display: block; position: absolute; z-index: 2; top: 0; right: 0; margin: 0;
+}
+.editable-page .optional-line > .resume-text:empty {
+  display: inline-block; min-width: 5em; padding: 1px 4px; color: #687386;
+  background: #f5f7fa; border: 1px dashed #a7b0bf; font-size: 8.5pt;
+}
+.editable-page .optional-line > .resume-text:empty::before { content: attr(data-placeholder); }
+
+.snapshot-body .resume-page { margin: 0 auto; box-shadow: none; }
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .resume-page { width: 210mm; height: 297mm; min-height: 297mm; margin: 0; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .editable-page .optional-line:has(> .resume-text:empty) { display: none !important; }
+}

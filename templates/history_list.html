@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}历史记录 · 简历生成 Agent{% endblock %}
+{% block body %}
+<main class="container">
+  <input type="text" id="history-filter" placeholder="按名称 / 公司 / 岗位筛选" aria-label="筛选历史记录">
+  <p id="snapshot-action-status" role="status"></p>
+  <div id="history-body">{% include '_history_body.html' %}</div>
+</main>
+<script defer src="{{ url_for('static', filename='js/generation-name.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/snapshot-trash.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>测试用户 - Resume</title>
+  
+  <style id="base-css">:root { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { background: #eef1f5; color: #20242b; font-family: "Songti SC", "STSong", "SimSun", serif; }
+.resume-page {
+  width: 210mm; min-height: 297mm; height: 297mm; margin: 18px auto; padding: 14mm 16mm;
+  background: #fff; box-shadow: 0 8px 28px rgba(23, 32, 48, .15); overflow: visible;
+  font-size: var(--resume-font-size, 10.5pt); line-height: var(--resume-line-height, 1.42); padding: var(--resume-padding, 14mm 16mm); --accent: #185d9d;
+}
+.theme-charcoal { --accent: #303640; }
+.theme-green { --accent: #18705a; }
+.resume-header { display: grid; grid-template-columns: minmax(0, 1fr) var(--photo-width); gap: 8mm; align-items: start; break-inside: avoid; }
+.header-content, .entry, .editable-item { position: relative; }
+.resume-header.no-photo { grid-template-columns: 1fr; gap: 0; }
+.resume-header h1 { margin: 0 0 2.5mm; color: var(--accent); font-size: 24pt; letter-spacing: .04em; }
+.contact-info { display: flex; flex-wrap: wrap; gap: 2mm 5mm; color: #4c5563; }
+.summary { margin: 3mm 0 0; }
+.profile-photo { width: var(--photo-width); height: var(--photo-height); object-fit: cover; object-position: var(--photo-position); display: block; border-radius: 2px; }
+.profile-photo.is-hidden { display: none; }
+.resume-section { margin-top: var(--section-gap, 4.2mm); }
+.resume-section h2 { margin: 0 0 2mm; padding-bottom: 1mm; color: var(--accent); border-bottom: 1.2px solid var(--accent); font-size: 13pt; }
+.entry { margin: 0 0 2.6mm; break-inside: avoid; }
+.density-compact .entry { margin-bottom: 1.6mm; }
+.entry-heading, .entry-sub { display: flex; justify-content: space-between; gap: 8mm; }
+.entry-sub { color: #596273; font-size: .95em; }
+ul { margin: 1mm 0 0; padding-left: 5mm; }
+li { margin: var(--bullet-gap, .7mm) 0; padding-left: .5mm; }
+.skills-line { margin: 0; }
+.skills-list { margin-top: 1mm; }
+.skill-item { position: relative; }
+.skill-content { display: inline; }
+.skill-description-wrap { display: inline; }
+[data-placeholder]:empty::before { content: attr(data-placeholder); color: #687386; }
+[data-placeholder]:focus::before { content: ""; }
+.resume-text { white-space: pre-line; }
+[contenteditable="true"] { border-radius: 2px; outline: none; }
+[contenteditable="true"]:focus { background: #fff5bf; box-shadow: 0 0 0 2px #f2d562; }
+.optional-line:has(> .resume-text:empty) { display: none; }
+.editable-page .optional-line:has(> .resume-text:empty) {
+  display: block; position: absolute; z-index: 2; top: 0; right: 0; margin: 0;
+}
+.editable-page .optional-line > .resume-text:empty {
+  display: inline-block; min-width: 5em; padding: 1px 4px; color: #687386;
+  background: #f5f7fa; border: 1px dashed #a7b0bf; font-size: 8.5pt;
+}
+.editable-page .optional-line > .resume-text:empty::before { content: attr(data-placeholder); }
+
+.snapshot-body .resume-page { margin: 0 auto; box-shadow: none; }
+@page { size: A4 portrait; margin: 0; }
+@media print {
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .resume-page { width: 210mm; height: 297mm; min-height: 297mm; margin: 0; box-shadow: none; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .editable-page .optional-line:has(> .resume-text:empty) { display: none !important; }
+}
+</style>
+  <style id="canvas-css">/* Ordered grid: no dense filling, absolute positioning, or visual reordering. */
+.canvas-sections, .canvas-items { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 3mm; align-items: start; }
+.canvas-sections > .resume-section, .canvas-items > .entry { position: relative; min-width: 0; }
+.canvas-sections > [hidden] { display: none; }
+.canvas-items > .entry { display: flow-root; }
+.entry-heading, .entry-sub { flex-wrap: wrap; column-gap: 2mm; }
+.entry-heading > *, .entry-sub > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.resume-section .resume-text { overflow-wrap: anywhere; }
+.skill-item { position: relative; }
+</style>
+  <style id="editor-css">[data-canvas-id].canvas-selected { outline: 1px dashed #407db0; outline-offset: 2px; }
+.canvas-handle, .canvas-resize { position: absolute; z-index: 5; font: 11px/1.2 Arial,sans-serif; padding: 0 2px; border: 1px solid #aebdcd; color: #345; background: #fff; opacity: 0; }
+.canvas-handle { left: -15px; top: 1px; cursor: grab; }
+.canvas-resize { right: -5px; bottom: 0; cursor: ew-resize; touch-action: none; }
+[data-canvas-id]:hover > .canvas-handle, [data-canvas-id]:hover > .canvas-resize, .canvas-selected > .canvas-handle, .canvas-selected > .canvas-resize, .canvas-handle:focus { opacity: 1; }
+.resume-section > .canvas-handle { left: -27px; }
+li > .canvas-handle { left: -22px; }
+.skill-item > .canvas-handle { top: -13px; left: 0; }
+.canvas-drop { outline: 2px solid #4a91cc; }
+@media print { .canvas-handle, .canvas-resize { display: none !important; } [data-canvas-id].canvas-selected, .canvas-drop { outline: none; } }
+
+/* Empty fields retain a hit target even after their hint disappears on focus. */
+.editable-page [data-path]:empty { display: inline-block; min-width: 4em; min-height: 1em; vertical-align: baseline; }
+.editable-page .optional-line:has(> .resume-text:empty) { position: static; display: block; }
+</style>
+  <style id="custom-css"></style>
+</head>
+<body class="snapshot-body theme-blue density-normal">
+  
+
+<article class="resume-page theme-blue density-normal editable-page" id="resume-page"
+         style="font-family: &#34;Times New Roman&#34;, &#34;Songti SC&#34;, &#34;STSong&#34;, &#34;SimSun&#34;, serif; --photo-width: 25mm; --photo-height: 32mm; --photo-position: center top; --resume-font-size: 10.5pt; --resume-line-height: 1.42; --resume-padding: 14mm 16mm; --section-gap: 4.2mm; --bullet-gap: .7mm;">
+  <header class="resume-header no-photo">
+    <div class="header-content">
+      <h1><span class="resume-text" contenteditable="true" data-path="profile.name" data-multiline="false">测试用户</span></h1>
+      <div class="contact-info">
+        <span><span class="resume-text" contenteditable="true" data-path="profile.phone" data-multiline="false">13800000000</span></span>
+        <span><span class="resume-text" contenteditable="true" data-path="profile.email" data-multiline="false">test@example.com</span></span>
+        <span><span class="resume-text" contenteditable="true" data-path="profile.location" data-multiline="false">上海</span></span>
+      </div>
+      <p class="summary optional-line"><span class="resume-text" contenteditable="true" data-path="profile.summary" data-multiline="true">求职方向为数据产品实习生。教育背景：本科、信息管理。已选技能包括Python。已选技能包括Excel。使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。</span></p>
+    </div>
+    
+    
+  </header>
+
+  <div class="canvas-sections" data-canvas-container>
+  
+    
+    
+    
+      <section class="resume-section" style="grid-column: span 12" data-canvas-id="canvas_69cdf0cbd80340b785458150f0d07e80" data-canvas-kind="section" data-section="education" >
+        <button type="button" class="canvas-handle" data-select-id="canvas_69cdf0cbd80340b785458150f0d07e80" draggable="true" aria-label="选择或拖动板块">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_69cdf0cbd80340b785458150f0d07e80" aria-label="拖动调整宽度">↔</button>
+        <h2><span class="resume-text" contenteditable="true" data-path="layout.sections.0.title" data-multiline="false">教育经历</span></h2>
+        <div class="canvas-items" data-canvas-container>
+        
+          
+          <div class="entry" data-canvas-id="canvas_f09e24b7a04143549d37ebac862517ca" data-canvas-kind="education" style="grid-column: span 12">
+            <button type="button" class="canvas-handle" data-select-id="canvas_f09e24b7a04143549d37ebac862517ca" draggable="true" aria-label="选择或拖动教育经历">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_f09e24b7a04143549d37ebac862517ca" aria-label="拖动调整宽度">↔</button>
+            <div class="entry-heading"><strong><span class="resume-text" contenteditable="true" data-path="education.0.school" data-multiline="false">测试大学</span></strong><span><span class="resume-text" contenteditable="true" data-path="education.0.date" data-multiline="false">2023.09–2027.06</span></span></div>
+            <div class="entry-sub"><span><span class="resume-text" contenteditable="true" data-path="education.0.degree" data-multiline="false">本科</span> · <span class="resume-text" contenteditable="true" data-path="education.0.major" data-multiline="false">信息管理</span></span></div>
+            <div class="optional-line"><span class="resume-text" contenteditable="true" data-path="education.0.details" data-multiline="true" data-placeholder="说明（可选）"></span></div>
+          </div>
+        
+        </div>
+      </section>
+    
+    
+  
+    
+    
+    
+      
+      
+      <section class="resume-section" style="grid-column: span 12" data-canvas-id="canvas_9ef79e8751cb44bd8d591201ddfaf047" data-canvas-kind="section" data-section="experience" >
+        <button type="button" class="canvas-handle" data-select-id="canvas_9ef79e8751cb44bd8d591201ddfaf047" draggable="true" aria-label="选择或拖动板块">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_9ef79e8751cb44bd8d591201ddfaf047" aria-label="拖动调整宽度">↔</button>
+        <h2><span class="resume-text" contenteditable="true" data-path="layout.sections.1.title" data-multiline="false">实习经历</span></h2>
+        <div class="canvas-items" data-canvas-container>
+        
+          
+          
+          <div class="entry editable-item" data-canvas-id="canvas_6cf5fcbe0fcd45c38a93ee75fe3142f7" data-canvas-kind="experience" style="grid-column: span 12" data-experience-id="canvas_6cf5fcbe0fcd45c38a93ee75fe3142f7">
+            <button type="button" class="canvas-handle" data-select-id="canvas_6cf5fcbe0fcd45c38a93ee75fe3142f7" draggable="true" aria-label="选择或拖动经历">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_6cf5fcbe0fcd45c38a93ee75fe3142f7" aria-label="拖动调整宽度">↔</button>
+            <div class="entry-heading"><strong><span class="resume-text" contenteditable="true" data-path="experiences.0.organization" data-multiline="false">画布排在最前的合成经历</span></strong><span><span class="resume-text" contenteditable="true" data-path="experiences.0.date" data-multiline="false">2026.01–2026.06</span></span></div>
+            <div class="entry-sub"><span><span class="resume-text" contenteditable="true" data-path="experiences.0.title" data-multiline="false">数据产品实习生</span></span><span><span class="resume-text" contenteditable="true" data-path="experiences.0.location" data-multiline="false">上海</span></span></div>
+            <ul data-canvas-container><li class="editable-item" data-canvas-id="canvas_b8849a26149d4dcbb39045c0e31bb4ce" data-canvas-kind="bullet"><button type="button" class="canvas-handle" data-select-id="canvas_b8849a26149d4dcbb39045c0e31bb4ce" draggable="true" aria-label="选择或拖动bullet">⠿</button><span class="resume-text" contenteditable="true" data-path="experiences.0.bullets.0.text" data-multiline="true">使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。</span></li></ul>
+          </div>
+        
+          
+          
+          <div class="entry editable-item" data-canvas-id="canvas_cb15462ca0b442069d0cf3e60e6c9fde" data-canvas-kind="experience" style="grid-column: span 12" data-experience-id="canvas_cb15462ca0b442069d0cf3e60e6c9fde">
+            <button type="button" class="canvas-handle" data-select-id="canvas_cb15462ca0b442069d0cf3e60e6c9fde" draggable="true" aria-label="选择或拖动经历">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_cb15462ca0b442069d0cf3e60e6c9fde" aria-label="拖动调整宽度">↔</button>
+            <div class="entry-heading"><strong><span class="resume-text" contenteditable="true" data-path="experiences.1.organization" data-multiline="false">测试科技有限公司</span></strong><span><span class="resume-text" contenteditable="true" data-path="experiences.1.date" data-multiline="false">2026.01–2026.06</span></span></div>
+            <div class="entry-sub"><span><span class="resume-text" contenteditable="true" data-path="experiences.1.title" data-multiline="false">数据产品实习生</span></span><span><span class="resume-text" contenteditable="true" data-path="experiences.1.location" data-multiline="false">上海</span></span></div>
+            <ul data-canvas-container><li class="editable-item" data-canvas-id="canvas_cb9b0692e5654e0cb20875e7a3a4b79d" data-canvas-kind="bullet"><button type="button" class="canvas-handle" data-select-id="canvas_cb9b0692e5654e0cb20875e7a3a4b79d" draggable="true" aria-label="选择或拖动bullet">⠿</button><span class="resume-text" contenteditable="true" data-path="experiences.1.bullets.0.text" data-multiline="true">使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。</span></li></ul>
+          </div>
+        
+        </div>
+      </section>
+      
+    
+    
+  
+    
+    
+    
+      
+      
+      <section class="resume-section" style="grid-column: span 12" data-canvas-id="canvas_05d637ce1997423e9da210ecef22aca4" data-canvas-kind="section" data-section="projects" >
+        <button type="button" class="canvas-handle" data-select-id="canvas_05d637ce1997423e9da210ecef22aca4" draggable="true" aria-label="选择或拖动板块">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_05d637ce1997423e9da210ecef22aca4" aria-label="拖动调整宽度">↔</button>
+        <h2><span class="resume-text" contenteditable="true" data-path="layout.sections.2.title" data-multiline="false">项目经历</span></h2>
+        <div class="canvas-items" data-canvas-container>
+        
+        </div>
+      </section>
+      
+    
+    
+  
+    
+    
+    
+      <section class="resume-section" style="grid-column: span 12" data-canvas-id="canvas_5be49789f9fb4ff4a713d8a5ddb47f1c" data-canvas-kind="section" data-section="skills" >
+        <button type="button" class="canvas-handle" data-select-id="canvas_5be49789f9fb4ff4a713d8a5ddb47f1c" draggable="true" aria-label="选择或拖动板块">⠿</button><button type="button" class="canvas-resize" data-resize-id="canvas_5be49789f9fb4ff4a713d8a5ddb47f1c" aria-label="拖动调整宽度">↔</button>
+        <h2><span class="resume-text" contenteditable="true" data-path="layout.sections.3.title" data-multiline="false">技能</span></h2>
+        <ul class="skills-list" data-canvas-container><li class="skill-item editable-item" data-canvas-id="canvas_ceda049be0a54f2793d4711afa3a6d5c" data-canvas-kind="skills"><button type="button" class="canvas-handle" data-select-id="canvas_ceda049be0a54f2793d4711afa3a6d5c" draggable="true" aria-label="选择或拖动技能">⠿</button><span class="skill-content"><span class="resume-text" contenteditable="true" data-path="skills.0.name" data-multiline="false">Python</span><span class="skill-description-wrap">：<span class="resume-text" contenteditable="true" data-path="skills.0.description" data-multiline="true" data-placeholder="说明（可选）"></span></span></span></li><li class="skill-item editable-item" data-canvas-id="canvas_b26b921b7703414cbdc37e59798ed9f8" data-canvas-kind="skills"><button type="button" class="canvas-handle" data-select-id="canvas_b26b921b7703414cbdc37e59798ed9f8" draggable="true" aria-label="选择或拖动技能">⠿</button><span class="skill-content"><span class="resume-text" contenteditable="true" data-path="skills.1.name" data-multiline="false">Excel</span><span class="skill-description-wrap">：<span class="resume-text" contenteditable="true" data-path="skills.1.description" data-multiline="true" data-placeholder="说明（可选）"></span></span></span></li></ul>
+      </section>
+    
+    
+  
+  </div>
+</article>
+</body>
+</html>

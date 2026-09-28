@@ -1,0 +1,32 @@
+  <section class="card">
+    <h2>历史记录（只读快照）</h2>
+    {% if generations %}
+    <p class="muted" id="history-empty" hidden>没有匹配的快照，换个关键词试试。</p>
+    <div id="history-list">
+      {% for item in generations %}
+      <div class="history-item" data-filter-text="{{ (item.display_name ~ ' ' ~ item.company ~ ' ' ~ item.role) | lower }}">
+        {% with generation_id=item.generation_id, display_name=item.display_name %}{% include "generation_name.html" %}{% endwith %}
+        <span class="history-meta">{{ item.company }} / {{ item.role }} · {{ item.generated_at | display_time }}</span>
+        <form data-snapshot-trash method="post" action="{{ url_for('generation_trash', generation_id=item.generation_id, action='move') }}" data-confirm="移入快照回收站后可以恢复，其他版本不受影响。"><button class="secondary">移入回收站</button></form>
+        <span class="history-actions">{% for lang in item.languages %}<a class="button secondary" href="{{ url_for('preview', generation_id=item.generation_id, language=lang) }}">{{ lang }} 查看已保存快照</a> {% endfor %}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<p class="empty-state">暂无生成记录。回到工作台填写公司和 JD，生成第一份定向简历。</p>{% endif %}
+  </section>
+
+  <details class="card collapsible" id="snapshot-trash">
+    <summary><h2>快照回收站</h2><span class="muted">{{ trash|length }} 项</span></summary>
+    <div class="collapsible-body">
+    {% for item in trash %}
+      <div class="history-item">
+        <strong>{{ item.display_name }}</strong><small>{{ item.generation_id }}</small>
+        <span class="history-meta">{{ item.company|default('') }} / {{ item.role|default('') }} · 生成：{{ item.generated_at|default('')|display_time }} · 移入：{{ item.deleted_at|display_time }}</span>
+        {% if item.pending %}<span class="muted">清理未完成，请重试彻底删除；不能恢复残缺快照。</span>{% else %}
+        <form data-snapshot-trash method="post" action="{{ url_for('generation_trash', generation_id=item.generation_id, action='restore') }}"><button class="secondary">恢复</button></form>
+        {% endif %}
+        <form data-snapshot-trash method="post" action="{{ url_for('generation_trash', generation_id=item.generation_id, action='purge') }}" data-confirm="彻底删除此快照及全部制品，不可恢复。履历库、其他版本和已有投递流水不受影响。"><button class="secondary">彻底删除</button></form>
+      </div>
+    {% else %}<p class="muted">快照回收站为空。</p>{% endfor %}
+    </div>
+  </details>

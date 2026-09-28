@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="{{ 'zh-CN' if resume.language == 'zh' else 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ resume.profile.name }} - Resume</title>
+  {# Compatibility contract: drafts.SnapshotResources reads these IDs from saved HTML. #}
+  <style id="base-css">{{ base_css | safe }}</style>
+  <style id="canvas-css">{{ canvas_css | safe }}</style>
+  {% if editor_css %}<style id="editor-css">{{ editor_css | safe }}</style>{% endif %}
+  <style id="custom-css">{{ custom_css | safe }}</style>
+</head>
+<body class="snapshot-body theme-{{ resume.theme }} density-{{ resume.density }}">
+  {{ page | safe }}
+</body>
+</html>

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}中文草稿 / {{ draft.display_name or draft_id }} · 简历生成 Agent{% endblock %}
+{% block body %}
+<div class="preview-shell">
+  <aside class="editor-panel">
+    <h2>中文草稿</h2>
+    <div id="draft-name" data-url="{{ url_for('name_draft', draft_id=draft_id) }}">
+      <button type="button" class="name-trigger" data-name-display title="{{ draft.display_name or draft_id }}">{{ draft.display_name or draft_id }}</button>
+      <input data-name-input aria-label="草稿名称（Enter 保存，Esc 取消）" hidden>
+      <small data-name-status role="status"></small>
+    </div>
+    <p>{{ draft.metadata.company }} / {{ draft.metadata.role }}<br>
+      <span class="muted">来源：{{ source_label(draft.metadata.parent_generation_id) }}</span></p>
+    <p class="notice">全部文字可直接编辑；正式保存写入新版本 ResumeSpec，不回写履历库。草稿只在内存中，重启服务会丢失未保存内容。</p>
+    <p class="muted">初始资源：{{ '来源 HTML 中的内嵌照片和 CSS' if draft.metadata.parent_generation_id else '创建草稿时的本地照片和 CSS' }}。只在主动更新时重新读取。</p>
+
+    <div class="button-row"><button id="undo" type="button" disabled title="撤销（⌘/Ctrl+Z）">撤销</button><button id="redo" type="button" disabled title="重做（⌘/Ctrl+Y 或 ⌘/Ctrl+Shift+Z）">重做</button></div>
+    <label for="inline-size">选中文字字号</label>
+    <div class="inline-apply"><select id="inline-size"><option value="">恢复默认</option>{% for n in range(16,49) %}<option value="{{ n / 2 }}">{{ n / 2 }} pt</option>{% endfor %}</select><button id="apply-inline-size" type="button" class="secondary compact">应用字号</button></div>
+    <label for="inline-font">选中文字中文字体</label>
+    <div class="inline-apply"><select id="inline-font"><option value="">恢复默认</option><option value="songti">宋体</option><option value="heiti">黑体</option><option value="kaiti">楷体</option></select><button id="apply-inline-font" type="button" class="secondary compact">应用字体</button></div>
+    <details class="editor-group" id="object-controls" open>
+      <summary>对象编辑</summary>
+      <p id="object-status" class="muted">点击 ⠿ 选择或拖动对象；点击文字直接编辑。</p>
+      <label>选择对象</label><select id="object-picker"><option value="">未选择</option></select>
+      <div class="button-row"><button id="copy-object" type="button" title="复制选中对象（⌘/Ctrl+C）">复制对象</button><button id="paste-object" type="button" title="粘贴对象（⌘/Ctrl+V）">粘贴对象</button><button id="duplicate-experience" type="button">复制当前经历</button></div>
+      <div class="button-row"><button id="move-up" type="button">上移</button><button id="move-down" type="button">下移</button><button id="remove-object" type="button" class="danger" title="删除或隐藏选中对象（Backspace）">删除 / 隐藏</button></div>
+      <label>移到对象之前或容器末尾</label><select id="move-target"></select><button id="move-to" type="button" class="secondary">移动到目标</button>
+      <button id="reset-layout" type="button" class="secondary">恢复全宽布局</button>
+      <label>新增对象</label><select id="add-kind"><option value="section">自定义板块</option><option value="education">教育经历</option><option value="experience">经历</option><option value="projects">项目</option><option value="bullet">Bullet（先选择经历、项目或自定义板块）</option><option value="skills">技能</option></select>
+      <div class="button-row"><button id="add-object" type="button">新增对象</button><button id="add-experience" type="button">新增一段经历</button></div>
+      <label>恢复隐藏板块</label><select id="restore-section"></select><button id="restore-section-button" type="button" class="secondary">恢复板块</button>
+      <p class="muted">宽度按 12 格吸附，内容自动换行重排。人工内容可无证据；超页需自行调整。对象复制快捷键只在选中对象时生效。</p>
+    </details>
+    <details class="editor-group">
+      <summary>排版与颜色</summary>
+      <label>主题</label><select id="theme"><option value="blue">蓝色</option><option value="charcoal">炭灰</option><option value="green">绿色</option></select>
+      <label>密度</label><select id="density"><option value="normal">标准</option><option value="compact">紧凑</option></select>
+      <label for="cjk-font">全文中文字体</label><select id="cjk-font"><option value="songti">宋体</option><option value="heiti">黑体</option><option value="kaiti">楷体</option></select>
+      <label>字号</label><input id="font-size" type="text">
+      <label>行距</label><input id="line-height" type="text">
+      <label>页面内边距</label><input id="page-padding" type="text">
+      <label>板块间距</label><input id="section-gap" type="text">
+      <label>Bullet 间距</label><input id="bullet-gap" type="text">
+      <label>标题色</label><select id="title-color"><option value="">跟随主题</option><option value="#185d9d">蓝色</option><option value="#303640">深灰</option><option value="#18705a">绿色</option><option value="#000000">黑色</option><option value="#800020">酒红</option></select>
+      <div class="button-row"><button type="button" id="save-layout-defaults" class="secondary">保存为默认排版</button><button type="button" id="clear-layout-defaults" class="secondary">清除已存默认排版</button></div>
+      <p class="muted">保存主题、密度、字体、字号、行距、页边距、板块/Bullet 间距与标题色。仅用于下次新生成，不含内容、顺序、照片、局部样式及自定义 CSS；不等于正式保存简历。</p>
+      <p class="muted" id="layout-defaults-status" role="status"></p>
+    </details>
+    <details class="editor-group">
+      <summary>照片</summary>
+      <label class="checkline"><input id="show-photo" type="checkbox"> 显示照片</label>
+      <label>宽度</label><select id="photo-width">{% for size in ['22mm','25mm','28mm','30mm','32mm','35mm','38mm','40mm'] %}<option>{{ size }}</option>{% endfor %}</select>
+      <label>高度</label><select id="photo-height">{% for size in ['22mm','25mm','28mm','30mm','32mm','35mm','38mm','40mm'] %}<option>{{ size }}</option>{% endfor %}</select>
+      <label>裁切位置</label><select id="photo-position"><option value="center top">中上</option><option value="center">居中</option><option value="center bottom">中下</option><option value="left top">左上</option><option value="right top">右上</option></select>
+      <label>替换草稿照片（不写履历库）</label><input type="file" id="draft-photo" accept="image/jpeg,image/png">
+    </details>
+    <details class="editor-group">
+      <summary>自定义 CSS</summary>
+      <textarea id="custom-css" spellcheck="false">{{ custom_css }}</textarea>
+      <div class="button-row"><button class="secondary" id="reset-css" type="button">重置为空</button><button class="secondary" id="restore-css" type="button">恢复初始样式</button></div>
+    </details>
+    <details class="editor-group">
+      <summary>资源更新</summary>
+      <div class="button-row"><button type="button" class="secondary" data-refresh="profile">读取当前履历文字（保留简介）</button><button type="button" class="secondary" data-refresh="photo">读取当前照片</button><button type="button" class="secondary" data-refresh="css">读取当前基础 CSS</button></div>
+    </details>
+    <div class="button-row"><button id="save" type="button" title="正式保存为新版本">正式保存新版本</button><button id="export" class="secondary" type="button" title="导出草稿 HTML（不建立正式记录）">导出草稿 HTML</button><button id="print" class="warning" type="button" title="打印当前草稿（允许内容不完整）">打印当前草稿</button></div>
+    <p class="muted">草稿导出/打印允许内容不完整，不建立正式记录。</p>
+    <div id="errors" class="error-box" hidden></div>
+  </aside>
+  <main class="preview-area">
+    <details class="collapsible analysis-panel" id="jd-analysis-panel">
+      <summary><strong>JD 分析与缺口</strong> <span class="muted collapsible-summary">{{ draft.metadata.company }} / {{ draft.metadata.role }}</span></summary>
+      <div class="collapsible-body">
+        {% set analysis = draft.analysis %}{% set match_report = draft.match_report %}
+        {% include "_analysis_panels.html" with context %}
+      </div>
+    </details>
+    <div id="draft-splitter" role="separator" aria-label="调整 JD 分析与简历预览高度" aria-orientation="horizontal" tabindex="0" hidden></div>
+    <section class="preview-bottom">
+    <div class="statusbar"><span id="layout-status">正在载入……</span> <span id="save-status" class="muted">未正式保存</span><span class="statusbar-actions"><button id="zoom-100" type="button" class="secondary zoom-toggle active">100%</button><button id="zoom-fit" type="button" class="secondary zoom-toggle">适应窗口</button></span></div>
+    <div class="resume-scroll"><div class="resume-zoom" id="resume-zoom"><iframe id="resume-frame" title="中文简历草稿" class="resume-frame"></iframe></div></div>
+    </section>
+  </main>
+</div>
+<dialog id="leave-dialog" aria-labelledby="leave-title">
+  <h2 id="leave-title">离开未保存草稿？</h2>
+  <p>草稿尚未正式保存，离开可能丢失修改。请先保存或导出需要保留的内容。</p>
+  <div class="button-row"><button id="keep-editing" type="button" autofocus>继续编辑</button><button id="leave-draft" type="button" class="secondary">放弃修改并离开</button></div>
+</dialog>
+<script id="draft-config" type="application/json">{{ {'draft_id': draft_id, 'spec': spec, 'custom_css': custom_css, 'revision': draft.get('revision', 0)} | tojson }}</script>
+<script src="{{ url_for('static', filename='js/preview-checker.js') }}"></script>
+<script>
+// v0.9.2k 纸张缩放：zoom 参与布局，只作用于 iframe 专用 wrapper，不动 iframe 内文档。
+(() => {
+  const wrapper = document.getElementById('resume-zoom');
+  const area = document.querySelector('.resume-scroll');
+  const btn100 = document.getElementById('zoom-100');
+  const btnFit = document.getElementById('zoom-fit');
+  const PAPER_WIDTH = 794; // 210mm @ 96dpi
+  let mode = '100';
+  const apply = () => {
+    if (mode === 'fit') {
+      const available = area.clientWidth - 40; // 与 .preview-area padding 对齐
+      wrapper.style.zoom = Math.min(1, available / PAPER_WIDTH);
+    } else {
+      wrapper.style.zoom = '';
+    }
+    btn100.classList.toggle('active', mode === '100');
+    btnFit.classList.toggle('active', mode === 'fit');
+  };
+  btn100.addEventListener('click', () => { mode = '100'; apply(); });
+  btnFit.addEventListener('click', () => { mode = 'fit'; apply(); });
+  window.addEventListener('resize', () => { if (mode === 'fit') apply(); });
+})();
+</script>
+<script src="{{ url_for('static', filename='js/pane-split.js') }}"></script>
+<script src="{{ url_for('static', filename='js/draft-split.js') }}"></script>
+<script src="{{ url_for('static', filename='js/draft-name.js') }}"></script>
+<script src="{{ url_for('static', filename='js/editor-model.js') }}"></script>
+<script src="{{ url_for('static', filename='js/inline-styles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+{% endblock %}

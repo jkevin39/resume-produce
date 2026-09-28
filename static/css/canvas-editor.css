@@ -1,0 +1,14 @@
+[data-canvas-id].canvas-selected { outline: 1px dashed #407db0; outline-offset: 2px; }
+.canvas-handle, .canvas-resize { position: absolute; z-index: 5; font: 11px/1.2 Arial,sans-serif; padding: 0 2px; border: 1px solid #aebdcd; color: #345; background: #fff; opacity: 0; }
+.canvas-handle { left: -15px; top: 1px; cursor: grab; }
+.canvas-resize { right: -5px; bottom: 0; cursor: ew-resize; touch-action: none; }
+[data-canvas-id]:hover > .canvas-handle, [data-canvas-id]:hover > .canvas-resize, .canvas-selected > .canvas-handle, .canvas-selected > .canvas-resize, .canvas-handle:focus { opacity: 1; }
+.resume-section > .canvas-handle { left: -27px; }
+li > .canvas-handle { left: -22px; }
+.skill-item > .canvas-handle { top: -13px; left: 0; }
+.canvas-drop { outline: 2px solid #4a91cc; }
+@media print { .canvas-handle, .canvas-resize { display: none !important; } [data-canvas-id].canvas-selected, .canvas-drop { outline: none; } }
+
+/* Empty fields retain a hit target even after their hint disappears on focus. */
+.editable-page [data-path]:empty { display: inline-block; min-width: 4em; min-height: 1em; vertical-align: baseline; }
+.editable-page .optional-line:has(> .resume-text:empty) { position: static; display: block; }

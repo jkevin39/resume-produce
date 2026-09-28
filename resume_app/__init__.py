@@ -1,0 +1,2 @@
+"""Local resume generator package."""
+

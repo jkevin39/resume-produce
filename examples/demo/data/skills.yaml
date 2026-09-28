@@ -1,0 +1,7 @@
+skills:
+  - name: Python
+    evidence_ids: [ev_feedback_001]
+  - name: SQL
+    evidence_ids: [ev_dashboard_001]
+  - name: Excel
+    user_confirmed: true

@@ -1,0 +1,17 @@
+<details class="card" id="model-settings">
+ <summary>模型设置 · {{ model_settings.model }} · 思考{{ '开启' if model_settings.thinking else '关闭' }}</summary>
+ <form id="model-settings-form">
+  <div class="grid">
+   <div><label for="model-provider">服务商</label><select id="model-provider" name="provider">
+   {% for key, value in model_catalog.items() %}<option value="{{ key }}" {% if key == model_settings.provider %}selected{% endif %}>{{ value.name }} · {{ '密钥已配置' if model_keys[key] else '未配置密钥' }}</option>{% endfor %}
+   </select></div>
+   <div><label for="model-name">模型</label><select id="model-name" name="model"></select></div>
+   <div><label for="model-thinking">思考模式</label><select id="model-thinking" name="thinking"><option value="false">关闭</option><option value="true" {% if model_settings.thinking %}selected{% endif %}>开启</option></select></div>
+  </div>
+  <p class="muted">保存后用于新一轮分析和材料导入；已经分析的 prepare 页面沿用原设置。{% if model_settings.mode == 'demo' %}当前是本地演示，选择模型不会调用真实服务。{% endif %}</p>
+  <p class="muted">密钥通过“配置模型密钥.command”分别录入，录入后重启服务。思考模式可能增加等待时间。</p>
+  <button type="submit">保存模型设置</button><span role="status" aria-live="polite"></span>
+ </form>
+ <script type="application/json" id="model-catalog">{{ model_catalog | tojson }}</script>
+ <script type="application/json" id="model-current">{{ model_settings | tojson }}</script>
+</details>

@@ -1,0 +1,81 @@
+{% macro handle(id, label, resizable=false) -%}
+{% if editable %}<button type="button" class="canvas-handle" data-select-id="{{ id }}" draggable="true" aria-label="选择或拖动{{ label }}">⠿</button>{% if resizable %}<button type="button" class="canvas-resize" data-resize-id="{{ id }}" aria-label="拖动调整宽度">↔</button>{% endif %}{% endif %}
+{%- endmacro %}
+{% macro field(value, path, multiline=false, placeholder='') -%}
+<span class="resume-text"{% if editable %} contenteditable="true" data-path="{{ path }}" data-multiline="{{ 'true' if multiline else 'false' }}"{% if not value and placeholder %} data-placeholder="{{ placeholder }}"{% endif %}{% endif %}>{{ render_field(resume, path) }}</span>
+{%- endmacro %}
+<article class="resume-page theme-{{ resume.theme }} density-{{ resume.density }}{% if editable %} editable-page{% endif %}" id="resume-page"
+         style="font-family: {{ font_stacks[resume.style.cjk_font] }}; --photo-width: {{ resume.photo.width }}; --photo-height: {{ resume.photo.height }}; --photo-position: {{ resume.photo.position }}; --resume-font-size: {{ resume.style.font_size | default('10.5pt') }}; --resume-line-height: {{ resume.style.line_height | default('1.42') }}; --resume-padding: {{ resume.style.page_padding | default('14mm 16mm') }}; --section-gap: {{ resume.style.section_gap | default('4.2mm') }}; --bullet-gap: {{ resume.style.bullet_gap | default('.7mm') }};{% if resume.style.title_color %} --accent: {{ resume.style.title_color }};{% endif %}">
+  <header class="resume-header{% if not resume.show_photo %} no-photo{% endif %}">
+    <div class="header-content">
+      <h1>{{ field(resume.profile.name, 'profile.name') }}</h1>
+      <div class="contact-info">
+        <span>{{ field(resume.profile.phone, 'profile.phone') }}</span>
+        <span>{{ field(resume.profile.email, 'profile.email') }}</span>
+        <span>{{ field(resume.profile.location, 'profile.location') }}</span>
+      </div>
+      <p class="summary optional-line">{{ field(resume.profile.summary, 'profile.summary', true, '简介（可选）') }}</p>
+    </div>
+    {# Compatibility contract: drafts.SnapshotResources reads profile-photo from saved HTML. #}
+    {% if resume.show_photo and photo_data_url %}<img class="profile-photo" src="{{ photo_data_url }}" alt="证件照">{% endif %}
+  </header>
+
+  <div class="canvas-sections" data-canvas-container>
+  {% for section_node in resume.layout.sections %}
+    {% set section = section_node.kind %}{% set section_i = loop.index0 %}
+    {% if editable or not section_node.hidden %}
+    {% if section == 'education' %}
+      <section class="resume-section" style="grid-column: span {{ section_node.span | default(12) }}" data-canvas-id="{{ section_node.canvas_id }}" data-canvas-kind="section" data-section="education" {% if section_node.hidden %}hidden{% endif %}>
+        {{ handle(section_node.canvas_id, '板块', true) }}
+        <h2>{{ field(section_node.title, 'layout.sections.' ~ section_i ~ '.title') }}</h2>
+        <div class="canvas-items" data-canvas-container>
+        {% for node in section_node['items'] %}
+          {% set item = resume.education | selectattr('canvas_id', 'equalto', node.canvas_id) | first %}{% set i = resume.education.index(item) %}
+          <div class="entry" data-canvas-id="{{ item.canvas_id }}" data-canvas-kind="education" style="grid-column: span {{ node.span | default(12) }}">
+            {{ handle(item.canvas_id, '教育经历', true) }}
+            <div class="entry-heading"><strong>{{ field(item.school, 'education.' ~ i ~ '.school', false, '学校') }}</strong><span>{{ field(item.date, 'education.' ~ i ~ '.date', false, '时间') }}</span></div>
+            <div class="entry-sub"><span>{{ field(item.degree, 'education.' ~ i ~ '.degree', false, '学历') }}{% if item.degree or item.major or editable %} · {% endif %}{{ field(item.major, 'education.' ~ i ~ '.major', false, '专业') }}</span></div>
+            <div class="optional-line">{{ field(item.details, 'education.' ~ i ~ '.details', true, '说明（可选）') }}</div>
+          </div>
+        {% endfor %}
+        </div>
+      </section>
+    {% elif section in ['experience', 'projects'] %}
+      {% set items = resume.experiences if section == 'experience' else resume.projects %}
+      {% if true %}
+      <section class="resume-section" style="grid-column: span {{ section_node.span | default(12) }}" data-canvas-id="{{ section_node.canvas_id }}" data-canvas-kind="section" data-section="{{ section }}" {% if section_node.hidden %}hidden{% endif %}>
+        {{ handle(section_node.canvas_id, '板块', true) }}
+        <h2>{{ field(section_node.title, 'layout.sections.' ~ section_i ~ '.title') }}</h2>
+        <div class="canvas-items" data-canvas-container>
+        {% for node in section_node['items'] %}
+          {% set item = items | selectattr('canvas_id', 'equalto', node.canvas_id) | first %}{% set i = items.index(item) %}
+          {% set key = 'experiences' if section == 'experience' else 'projects' %}
+          <div class="entry editable-item" data-canvas-id="{{ item.canvas_id }}" data-canvas-kind="{{ section }}" style="grid-column: span {{ node.span | default(12) }}"{% if section == 'experience' %} data-experience-id="{{ item.canvas_id }}"{% endif %}>
+            {{ handle(item.canvas_id, '经历' if section == 'experience' else '项目', true) }}
+            <div class="entry-heading"><strong>{{ field(item.organization, key ~ '.' ~ i ~ '.organization', false, '公司/组织' if section == 'experience' else '项目名称') }}</strong><span>{{ field(item.date, key ~ '.' ~ i ~ '.date', false, '时间') }}</span></div>
+            <div class="entry-sub"><span>{{ field(item.title, key ~ '.' ~ i ~ '.title', false, '职位/角色' if section == 'experience' else '角色') }}</span><span>{{ field(item.location, key ~ '.' ~ i ~ '.location', false, '地点') }}</span></div>
+            <ul data-canvas-container>{% for bullet in item.bullets %}<li class="editable-item" data-canvas-id="{{ bullet.canvas_id }}" data-canvas-kind="bullet">{{ handle(bullet.canvas_id, 'bullet') }}{{ field(bullet.text, key ~ '.' ~ i ~ '.bullets.' ~ loop.index0 ~ '.text', true, '填写经历内容' if section == 'experience' else '填写项目内容') }}</li>{% endfor %}</ul>
+          </div>
+        {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    {% elif section == 'skills' %}
+      <section class="resume-section" style="grid-column: span {{ section_node.span | default(12) }}" data-canvas-id="{{ section_node.canvas_id }}" data-canvas-kind="section" data-section="skills" {% if section_node.hidden %}hidden{% endif %}>
+        {{ handle(section_node.canvas_id, '板块', true) }}
+        <h2>{{ field(section_node.title, 'layout.sections.' ~ section_i ~ '.title') }}</h2>
+        <ul class="skills-list" data-canvas-container>{% for node in section_node['items'] %}{% set skill = resume.skills | selectattr('canvas_id', 'equalto', node.canvas_id) | first %}{% set i = resume.skills.index(skill) %}<li class="skill-item editable-item" data-canvas-id="{{ skill.canvas_id }}" data-canvas-kind="skills">{{ handle(skill.canvas_id, '技能') }}<span class="skill-content">{{ field(skill.name, 'skills.' ~ i ~ '.name', false, '技能名称') }}{% if skill.description or editable %}<span class="skill-description-wrap">{% if skill.name or skill.description or editable %}：{% endif %}{{ field(skill.description, 'skills.' ~ i ~ '.description', true, '说明（可选）') }}</span>{% endif %}</span></li>{% endfor %}</ul>
+      </section>
+    {% elif section == 'custom' %}
+      <section class="resume-section" style="grid-column: span {{ section_node.span | default(12) }}" data-canvas-id="{{ section_node.canvas_id }}" data-canvas-kind="section" data-section="custom" {% if section_node.hidden %}hidden{% endif %}>
+        {{ handle(section_node.canvas_id, '板块', true) }}
+        <h2>{{ field(section_node.title, 'layout.sections.' ~ section_i ~ '.title', false, '板块标题') }}</h2>
+        <ul data-canvas-container>{% for node in section_node['items'] %}{% set item = resume.custom_bullets | selectattr('canvas_id', 'equalto', node.canvas_id) | first %}{% set i = resume.custom_bullets.index(item) %}
+          <li data-canvas-id="{{ item.canvas_id }}" data-canvas-kind="custom">{{ handle(item.canvas_id, 'bullet') }}{{ field(item.text, 'custom_bullets.' ~ i ~ '.text', true, '填写内容') }}</li>
+        {% endfor %}</ul>
+      </section>
+    {% endif %}
+    {% endif %}
+  {% endfor %}
+  </div>
+</article>

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}快照详情 · 简历生成 Agent{% endblock %}
+{% block body %}
+<main class="container">
+  <h2>{% with generation_id=metadata.generation_id %}{% include "generation_name.html" %}{% endwith %} / {{ language }}（已保存，只读）</h2>
+  <p>{{ metadata.company }} / {{ metadata.role }} · {{ metadata.generated_at | display_time }}</p>
+  <p class="muted">来源：{{ source_label(metadata.parent_generation_id) }}</p>
+  <p id="snapshot-action-status" role="status"></p>
+  <div class="button-row">
+    {% if language == 'zh' %}<form method="post" action="{{ url_for('continue_edit', generation_id=metadata.generation_id, language='zh') }}"><button type="submit">复制中文并继续编辑</button></form>{% endif %}
+    <button id="print-snapshot" type="button">打印已保存 HTML</button>
+    <a class="button secondary" target="_blank" href="{{ url_for('snapshot', generation_id=metadata.generation_id, language=language) }}">打开原始快照</a>
+    <form data-snapshot-trash method="post" action="{{ url_for('generation_trash', generation_id=metadata.generation_id, action='move') }}" data-confirm="移入快照回收站后可以恢复，其他版本不受影响。"><button class="secondary">移入回收站</button></form>
+    <a class="button secondary" href="{{ url_for('history_list') }}">返回历史记录</a>
+  </div>
+  <p class="notice">本页直接显示保存时的 HTML，不读取当前履历或证据状态。{{ '英文功能已冻结，本制品仅供查看和打印。' if language == 'en' else '' }}</p>
+  <div id="layout-status" class="statusbar">正在检查布局……</div>
+  <iframe id="resume-frame" class="resume-frame" title="已保存简历快照" src="{{ url_for('snapshot', generation_id=metadata.generation_id, language=language) }}"></iframe>
+</main>
+<script src="{{ url_for('static', filename='js/preview-checker.js') }}"></script>
+<script>
+const frame = document.getElementById('resume-frame');
+const status = document.getElementById('layout-status');
+frame.addEventListener('load', () => ResumePreview.show(frame, status));
+document.getElementById('print-snapshot').addEventListener('click', () => ResumePreview.print(frame, status));
+</script>
+<script defer src="{{ url_for('static', filename='js/generation-name.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/snapshot-trash.js') }}"></script>
+{% endblock %}

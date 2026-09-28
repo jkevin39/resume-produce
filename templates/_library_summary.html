@@ -1,0 +1,2 @@
+{# 履历库折叠块摘要行内容。入参：profile、experiences、evidence、skills。含 data-profile-name 供保存基本信息后改名联动。 #}
+{% if experiences %}<span data-profile-name>{{ profile.profile.name or '姓名待填写' }}</span> · {{ experiences|length }} 段经历 · {{ evidence|length }} 个证据点 · {{ skills|length }} 项技能{% else %}尚无经历，请先在上方"履历材料"导入{% endif %}

@@ -1,0 +1,9 @@
+/* Ordered grid: no dense filling, absolute positioning, or visual reordering. */
+.canvas-sections, .canvas-items { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 3mm; align-items: start; }
+.canvas-sections > .resume-section, .canvas-items > .entry { position: relative; min-width: 0; }
+.canvas-sections > [hidden] { display: none; }
+.canvas-items > .entry { display: flow-root; }
+.entry-heading, .entry-sub { flex-wrap: wrap; column-gap: 2mm; }
+.entry-heading > *, .entry-sub > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.resume-section .resume-text { overflow-wrap: anywhere; }
+.skill-item { position: relative; }

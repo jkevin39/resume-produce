@@ -1,0 +1,18 @@
+{% set material = ocr_kind | default('jd') == 'material' %}
+{% set label = '材料正文' if material else 'JD' %}
+{% set prefix = 'material' if material else 'jd' %}
+<details id="{{ prefix }}-ocr" class="ocr-panel" data-ocr-target="{{ 'source_text' if material else 'jd_text' }}" data-ocr-label="{{ label }}" {% if material %}data-ocr-file="source_file"{% endif %}>
+  <summary>粘贴或选择{{ label }}图片</summary>
+  <p class="muted">图片仅在本机识别，一次一张 PNG/JPEG，最大 4MB、2400 万像素。</p>
+  {% if material %}<p class="muted">一次导入一个经历、项目或技能；整页简历请先拆分，教育信息请在基本信息中填写。</p>{% endif %}
+  {% if ocr_available %}
+  <div data-image-paste tabindex="0" role="region" aria-label="{{ label }}图片粘贴区">点击此处后按 ⌘V 粘贴截图</div>
+  <input type="file" accept="image/png,image/jpeg" aria-label="选择{{ label }}图片">
+  <img hidden alt="待识别{{ label }}图片">
+  <button type="button" data-recognize disabled>识别文字</button>
+  <label for="{{ 'material-ocr-result' if material else 'ocr-result' }}">识别结果（可修改）</label><textarea id="{{ 'material-ocr-result' if material else 'ocr-result' }}"></textarea>
+  <button type="button" data-apply="append" disabled>追加到{{ label }}</button>
+  <button type="button" data-apply="replace" disabled>替换{{ label }}</button>
+  <p role="status" aria-live="polite"></p>
+  {% else %}<p role="status">本机 OCR 尚未就绪，请运行 tools/build_macos.py 构建识别组件。</p>{% endif %}
+</details>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}工作台 · 简历生成 Agent{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script defer src="{{ url_for('static', filename='js/toast.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/model-forms.js') }}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body class="app">
+  <header class="topbar">
+    <h1><a href="{{ url_for('index') }}">简历生成与调整 Agent</a></h1>
+    <nav class="topnav" aria-label="页面导航">
+      <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active" aria-current="page"{% endif %}>工作台</a>
+      <a href="{{ url_for('history_list') }}" {% if request.endpoint == 'history_list' %}class="active" aria-current="page"{% endif %}>历史记录</a>
+    </nav>
+  </header>
+  {% block body %}{% endblock %}
+</body>
+</html>

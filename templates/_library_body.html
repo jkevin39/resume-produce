@@ -1,0 +1,3 @@
+{% for exp in experiences %}{% include '_library_experience.html' %}{% else %}<p class="empty-state">暂无经历。在履历材料区新建，或从回收站恢复。</p>{% endfor %}
+<div id="library-skills"><h3>技能</h3>{% for item in skills %}{% include '_library_skill.html' %}{% else %}<p class="muted">暂无技能。</p>{% endfor %}</div>
+

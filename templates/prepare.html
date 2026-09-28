@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}分析与证据选择 · 简历生成 Agent{% endblock %}
+{% block body %}
+<main class="container prepare-page">
+  <section class="prepare-header">
+    <h2>{{ company }} · {{ role }}</h2>
+    <p class="muted">针对该岗位的 JD 分析、缺口与证据选择。勾选证据和技能后，由模型生成中文草稿。</p>
+  </section>
+  <div id="prepare-workspace">
+  <div id="prepare-analysis">
+    <input class="analysis-tab-radio" type="radio" name="analysis-tab" id="tab-analysis" checked>
+    <input class="analysis-tab-radio" type="radio" name="analysis-tab" id="tab-gaps">
+    <div class="analysis-tab-bar" aria-label="分析面板分页">
+      <label for="tab-analysis">JD 四类分析</label><label for="tab-gaps">缺口与关键词覆盖</label>
+    </div>
+    {% include "_analysis_panels.html" %}
+  </div>
+  <div id="prepare-splitter" class="pane-splitter" role="separator" aria-label="调整分析与证据选择宽度" aria-orientation="vertical" tabindex="0"></div>
+  <form class="card prepare-evidence" method="post" data-model-form data-loading-text="正在生成中文草稿，通常需要几十秒，请勿重复提交。" action="{{ url_for('generate') }}">
+    <h2>选择或排除证据</h2><p class="muted">勾选可使用的证据，无证据缺口不会写入简历。</p>
+    <p class="notice" id="order-notice">{{ order_label }}。可用“上移 / 下移”调整经历和技能的优先级；生成草稿将沿用当前顺序，仅包含已选内容。</p>
+    <input type="hidden" name="display_order" value="{}">
+    <p class="muted">本轮模型：{{ model_label }}</p>
+      <input type="hidden" name="model_snapshot" value='{{ model_snapshot | tojson }}'>
+      <input type="hidden" name="company" value="{{ company }}"><input type="hidden" name="role" value="{{ role }}"><input type="hidden" name="jd_text" value="{{ jd_text }}">
+    <textarea hidden name="analysis_json">{{ analysis | tojson }}</textarea><textarea hidden name="match_json">{{ match_report | tojson }}</textarea>
+    {% for section in evidence_sections %}
+    <details class="evidence-section" data-evidence-section="{{ section.kind }}" open>
+      <summary><strong>{{ section.title }}</strong></summary>
+      {% for entry in section.entries %}{% set exp = entry.experience %}
+      {% set preselected = entry.bullets | rejectattr('evidence.status', 'equalto', 'rejected') | selectattr('match.category', 'in', ['strong', 'partial']) | list | length %}
+      <details class="evidence-experience{% if preselected %} has-selection{% endif %}" data-experience-id="{{ exp.experience_id }}" data-order-id="{{ exp.experience_id }}">
+        <summary><strong>{{ exp.organization }} · {{ exp.title }}</strong> <span class="muted">{{ exp.date }} · {{ exp.location }}</span> <span class="badge selection-badge" data-selection-badge{% if not preselected %} hidden{% endif %}>已选 {{ preselected }}</span><span class="order-actions"><button type="button" class="secondary compact" data-order-move="-1" aria-label="上移经历">上移</button><button type="button" class="secondary compact" data-order-move="1" aria-label="下移经历">下移</button></span></summary>
+        {% for bullet in entry.bullets %}{% set item = bullet.evidence %}{% set match = bullet.match %}
+        <label class="evidence checkline"><input type="checkbox" name="evidence_ids" value="{{ item.evidence_id }}" {% if item.status == 'rejected' %}disabled{% elif match.category in ['strong','partial'] %}checked{% endif %}><span><span class="badge {{ match.category }}">{{ '未评估' if match.unassessed else match.category }}</span> <strong>{{ item.original_fact }}</strong><br><span class="muted">{{ match.reason }} · {{ item.evidence_id }} · {{ item.status }}</span>
+          {% if bullet.skills %}<span class="evidence-skills">{% for name in bullet.skills %}<span class="badge">{{ name }}</span> {% endfor %}</span>{% endif %}
+        </span></label>
+        {% endfor %}
+      </details>
+      {% endfor %}
+    </details>
+    {% else %}<p class="muted">暂无候选证据。</p>{% endfor %}
+    <section class="skill-selection"><h3>技能</h3><p class="muted">只选择需要的技能；技能须有已选证据或用户确认支持。也可用上移 / 下移调整技能顺序。</p>
+      {% if description_warning %}<p class="notice">{{ description_warning }}</p>{% endif %}
+      <input type="hidden" name="skill_desc_payload" value="{}">
+      <ul data-order-skills>{% for item in skill_options %}<li data-order-id="{{ item.name }}"><span class="order-actions"><button type="button" class="secondary compact" data-order-move="-1" aria-label="上移技能">上移</button><button type="button" class="secondary compact" data-order-move="1" aria-label="下移技能">下移</button></span>
+        <label class="checkline"><input type="checkbox" name="skill_names" value="{{ item.name }}" data-evidence-ids='{{ item.available_evidence_ids | tojson }}' data-confirmed="{{ 'true' if item.user_confirmed else 'false' }}" {% if item.eligible %}checked{% else %}disabled{% endif %}><span><strong>{{ item.name }}</strong>{% if item.description %}：{{ item.description }}{% endif %}<small class="muted" data-skill-status>{% if not item.eligible %}需先选择关联证据，或在技能库确认。{% endif %}</small></span></label>
+        <label>当次技能描述<input type="text" data-skill-description value="{{ item.suggested_description }}" {% if not item.eligible %}disabled{% endif %}></label>
+      </li>{% else %}<li class="muted">暂无技能。</li>{% endfor %}</ul>
+    </section>
+    <div class="button-row"><button type="submit">生成中文草稿</button><a class="button secondary" href="{{ url_for('index') }}">返回</a></div>
+  </form>
+  </div>
+</main>
+<script defer src="{{ url_for('static', filename='js/pane-split.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/prepare-split.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/prepare-tabs.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/skill-selection.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/selection-badge.js') }}"></script>
+<script defer src="{{ url_for('static', filename='js/prepare-order.js') }}"></script>
+{% endblock %}

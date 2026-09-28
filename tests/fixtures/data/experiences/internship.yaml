@@ -1,0 +1,38 @@
+experience_id: internship_001
+type: experience
+organization: 测试科技有限公司
+title: 数据产品实习生
+date: 2026.01–2026.06
+location: 上海
+source_refs: [sources/test-profile.md]
+evidence:
+  - evidence_id: ev_feedback_001
+    original_fact: 使用 Python 清洗约 2 万条用户反馈。
+    structured_fact:
+      action: 清洗用户反馈
+      method: Python
+      scale: 约 2 万条
+      result: 支持问题分类
+      skills: [Python, 数据分析]
+    candidate_zh: 使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。
+    status: confirmed
+  - evidence_id: ev_dashboard_001
+    original_fact: 使用 SQL 维护周度指标看板。
+    structured_fact:
+      action: 维护指标看板
+      method: SQL
+      scale: 每周
+      result: 减少人工整理时间
+      skills: [SQL]
+    candidate_zh: 使用 SQL 汇总产品数据并维护周度指标看板，减少人工整理时间。
+    status: confirmed
+  - evidence_id: ev_research_001
+    original_fact: 参与竞品研究并整理访谈结论。
+    structured_fact:
+      action: 参与竞品研究
+      method: 用户访谈
+      scale: ""
+      result: 整理访谈结论
+      skills: [用户研究]
+    candidate_zh: 参与竞品研究并整理用户访谈结论。
+    status: needs_details

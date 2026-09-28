@@ -1,0 +1,5 @@
+Flask==3.1.2
+PyYAML==6.0.2
+requests==2.32.5
+urllib3<2
+waitress==3.0.2

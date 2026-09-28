@@ -1,0 +1,36 @@
+<details class="collapsible collapsible-sub" data-collapsible="exp:{{ exp.experience_id }}">
+  <summary><span class="badge">{{ '项目经历' if exp.type == 'project' else '实习经历' }}</span> <strong>{{ [exp.organization, exp.title, exp.date, exp.location]|select|join('，') }}</strong> <span class="muted">{{ exp.evidence|length }} 个证据点</span></summary>
+  <div class="collapsible-body">
+    <div class="experience-tools">
+      <details class="experience-edit"><summary>编辑经历信息</summary>
+        <form method="post" action="{{ url_for('library_edit') }}" data-library-form>
+          <input type="hidden" name="kind" value="experience"><input type="hidden" name="identifier" value="{{ exp.experience_id }}">
+          <div class="grid">
+            <label>类型<select name="type"><option value="experience" {% if exp.type == 'experience' %}selected{% endif %}>实习经历</option><option value="project" {% if exp.type == 'project' %}selected{% endif %}>项目经历</option></select></label>
+            {% for key, label in [('organization','公司 / 项目名称'),('title','岗位 / 角色'),('date','时间'),('location','地点')] %}<label>{{ label }}<input name="{{ key }}" value="{{ exp[key] }}"></label>{% endfor %}
+          </div>
+          <button class="compact">保存经历信息</button><small data-library-status role="status"></small>
+        </form>
+      </details>
+      <form method="post" action="{{ url_for('library_delete') }}" data-library-form data-confirm="整段经历及其证据将移入回收站，可恢复；已生成简历不受影响。"><input type="hidden" name="kind" value="experience"><input type="hidden" name="identifier" value="{{ exp.experience_id }}"><button class="secondary compact">删除整段经历</button><small data-library-status role="status"></small></form>
+    </div>
+  {% for item in exp.evidence %}
+    <div class="evidence" data-library-evidence="{{ item.evidence_id }}">
+      <span class="evidence-status-badges"><span class="badge confirmed">已确认</span><span class="badge needs_details">待补充</span><span class="badge rejected">已排除</span></span>
+      <div class="library-evidence-fact">{{ item.original_fact }}</div>
+      <form class="library-evidence-delete" method="post" action="{{ url_for('library_delete') }}" data-library-form data-confirm="移入回收站，可在回收站恢复；已生成简历不受影响。"><input type="hidden" name="kind" value="evidence"><input type="hidden" name="identifier" value="{{ item.evidence_id }}"><button class="secondary compact">删除</button><small data-library-status role="status"></small></form>
+      <div class="library-evidence-meta"><small class="evidence-id">{{ item.evidence_id }}</small>{% for skill in skills %}{% if item.evidence_id in skill.evidence_ids or skill.name in item.structured_fact.skills %}<span class="badge">{{ skill.name }}</span> {% endif %}{% endfor %}</div>
+      <details class="evidence-editor"><summary>编辑</summary><div class="evidence-edit-grid">
+<form method="post" action="{{ url_for('library_edit') }}" data-library-form>
+        <input type="hidden" name="kind" value="evidence"><input type="hidden" name="identifier" value="{{ item.evidence_id }}">
+        <label>事实全文<textarea name="text" required>{{ item.original_fact }}</textarea></label>
+        <p class="muted">编辑即更新事实本身；只想改单份简历措辞请去草稿编辑器。请同时核对技能关联。</p>
+        <div class="library-skill-checks">{% for skill in skills %}<label><input type="checkbox" name="skill_names" value="{{ skill.name }}" {% if item.evidence_id in skill.evidence_ids or skill.name in item.structured_fact.skills %}checked{% endif %}>{{ skill.name }}</label>{% endfor %}</div>
+        <button class="compact">保存事实与关联</button><small data-library-status role="status"></small>
+      </form>
+<form class="evidence-status-editor" data-evidence-form data-saved-status="{{ item.status }}" method="post" action="{{ url_for('evidence_status', evidence_id=item.evidence_id) }}"><label>证据状态</label><select name="status">{% for status in ['confirmed','needs_details','rejected'] %}<option value="{{ status }}" {% if item.status == status %}selected{% endif %}>{{ status }}</option>{% endfor %}</select><button class="secondary compact" type="submit">更新</button><small data-update-status role="status"></small></form>
+      </div></details>
+    </div>
+  {% endfor %}
+  </div>
+</details>

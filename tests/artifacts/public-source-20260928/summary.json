@@ -1,0 +1,20 @@
+{
+  "tests": 123,
+  "failures": 0,
+  "errors": 0,
+  "render_count": 85,
+  "html_count": 2,
+  "capture_mode": "representative",
+  "artifacts": [
+    {
+      "mode": "editable",
+      "html": "render-editable/resume.html",
+      "spec": "render-editable/resume-spec.json"
+    },
+    {
+      "mode": "static",
+      "html": "render-static/resume.html",
+      "spec": "render-static/resume-spec.json"
+    }
+  ]
+}
