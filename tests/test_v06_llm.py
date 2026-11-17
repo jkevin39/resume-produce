@@ -47,7 +47,7 @@ class V06LLMTest(unittest.TestCase):
         self.temp.cleanup()
 
     def test_four_versioned_prompts_have_json_examples(self):
-        self.assertEqual(PROMPT_VERSION, "v0.11.1-fgh")
+        self.assertEqual(PROMPT_VERSION, "v0.11.2")
         for prompt in (EXTRACT_EXPERIENCE_PROMPT, ANALYZE_JD_PROMPT, MATCH_EVIDENCE_PROMPT, BUILD_RESUME_SPEC_PROMPT):
             self.assertIn("JSON", prompt)
             self.assertIn("示例", prompt)

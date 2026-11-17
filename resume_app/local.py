@@ -41,7 +41,7 @@ def initialize(destination: Path, source: Path = None):
             raise ValueError("目标必须位于来源目录之外。")
         original = read_yaml(source / "config.yaml", {})
         # Copy only known non-secret configuration, never arbitrary old fields.
-        for section, keys in (("llm", ("mode", "base_url", "model", "timeout_seconds", "max_tokens", "provider", "thinking")), ("app", ("port",))):
+        for section, keys in (("llm", ("mode", "base_url", "model", "timeout_seconds", "max_tokens", "provider", "thinking", "qwen_base_url")), ("app", ("port",))):
             values = original.get(section, {})
             for key in keys:
                 if key in values:

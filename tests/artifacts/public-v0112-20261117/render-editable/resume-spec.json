@@ -1,0 +1,173 @@
+{
+  "custom_bullets": [],
+  "density": "normal",
+  "education": [
+    {
+      "canvas_id": "canvas_1412dfa1694c4677b8df0a02624d06b1",
+      "date": "2023.09–2027.06",
+      "degree": "本科",
+      "details": "",
+      "education_id": "edu_test_001",
+      "major": "信息管理",
+      "school": "测试大学"
+    }
+  ],
+  "experiences": [
+    {
+      "bullets": [
+        {
+          "canvas_id": "canvas_fef368100f9741c9ad3bc52ef8f2aeac",
+          "evidence_ids": [
+            "ev_feedback_001"
+          ],
+          "text": "使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。"
+        }
+      ],
+      "canvas_id": "canvas_daa9058cab8d47fa8bcd4481d03e03d7",
+      "date": "2026.01–2026.06",
+      "experience_id": "internship_001",
+      "location": "上海",
+      "organization": "画布排在最前的合成经历",
+      "title": "数据产品实习生"
+    },
+    {
+      "bullets": [
+        {
+          "canvas_id": "canvas_075d66496c6441cbbec52c51ab95b47e",
+          "evidence_ids": [
+            "ev_feedback_001"
+          ],
+          "text": "使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。"
+        }
+      ],
+      "canvas_id": "canvas_435ede1e5a7a4e4d9201da3253ca5c21",
+      "date": "2026.01–2026.06",
+      "experience_id": "internship_001",
+      "location": "上海",
+      "organization": "测试科技有限公司",
+      "title": "数据产品实习生"
+    }
+  ],
+  "generation_id": "gen-20261117-001",
+  "language": "zh",
+  "layout": {
+    "sections": [
+      {
+        "canvas_id": "canvas_f994020a33f740e99d75b9929771ea76",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_1412dfa1694c4677b8df0a02624d06b1"
+          }
+        ],
+        "kind": "education",
+        "section": "education",
+        "span": 12,
+        "title": "教育经历"
+      },
+      {
+        "canvas_id": "canvas_de93cbc09a584d3397fd7b2b7baef310",
+        "hidden": false,
+        "items": [
+          {
+            "bullets": [
+              "canvas_fef368100f9741c9ad3bc52ef8f2aeac"
+            ],
+            "canvas_id": "canvas_daa9058cab8d47fa8bcd4481d03e03d7"
+          },
+          {
+            "bullets": [
+              "canvas_075d66496c6441cbbec52c51ab95b47e"
+            ],
+            "canvas_id": "canvas_435ede1e5a7a4e4d9201da3253ca5c21"
+          }
+        ],
+        "kind": "experience",
+        "section": "experience",
+        "span": 12,
+        "title": "实习经历"
+      },
+      {
+        "canvas_id": "canvas_ad0c393960ca4289b447b400155484cf",
+        "hidden": false,
+        "items": [],
+        "kind": "projects",
+        "section": "projects",
+        "span": 12,
+        "title": "项目经历"
+      },
+      {
+        "canvas_id": "canvas_514794f610a549ffad0731ff37554133",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_e6467be2834344cd81af68a64a772afb"
+          },
+          {
+            "canvas_id": "canvas_8f400bce3f664364b3b51f13bb66c8aa"
+          }
+        ],
+        "kind": "skills",
+        "section": "skills",
+        "span": 12,
+        "title": "技能"
+      }
+    ],
+    "version": 2
+  },
+  "photo": {
+    "width": "25mm",
+    "height": "32mm",
+    "position": "center top"
+  },
+  "profile": {
+    "name": "测试用户",
+    "phone": "13800000000",
+    "email": "test@example.com",
+    "location": "上海",
+    "summary": "求职方向为数据产品实习生。教育背景：本科、信息管理。已选技能包括Python。已选技能包括Excel。使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。"
+  },
+  "projects": [],
+  "section_order": [
+    "education",
+    "experience",
+    "projects",
+    "skills"
+  ],
+  "section_titles": {
+    "education": "教育经历",
+    "experience": "实习经历",
+    "projects": "项目经历",
+    "skills": "技能"
+  },
+  "show_photo": false,
+  "skills": [
+    {
+      "canvas_id": "canvas_e6467be2834344cd81af68a64a772afb",
+      "description": "",
+      "evidence_ids": [
+        "ev_feedback_001"
+      ],
+      "name": "Python",
+      "user_confirmed": false
+    },
+    {
+      "canvas_id": "canvas_8f400bce3f664364b3b51f13bb66c8aa",
+      "description": "",
+      "evidence_ids": [],
+      "name": "Excel",
+      "user_confirmed": true
+    }
+  ],
+  "style": {
+    "cjk_font": "songti",
+    "font_size": "10.5pt",
+    "line_height": "1.42",
+    "page_padding": "14mm 16mm",
+    "section_gap": "4.2mm",
+    "bullet_gap": ".7mm",
+    "title_color": ""
+  },
+  "template": "classic",
+  "theme": "blue"
+}

@@ -13,7 +13,7 @@ from flask import g, Flask, jsonify, redirect, render_template, request, url_for
 
 from resume_app.models import PROVIDERS, selection, key_available
 from resume_app import ocr
-from resume_app.layout_defaults import load_defaults, validate_defaults
+from resume_app.layout_defaults import load_defaults, validate_defaults, load_formats, change_formats, present_formats
 from resume_app.ordering import catalog, validate_order, ordered
 from resume_app.drafts import normalize_spec
 from resume_app.canvas import refresh_education
@@ -69,10 +69,21 @@ def create_app(root: Path = ROOT, testing: bool = False, *, data_root: Path = No
             try:
                 if request.method == "PUT":
                     value = validate_defaults(request.get_json(silent=True))
+                    existing = read_yaml(layout_defaults_path, {})
+                    if isinstance(existing, dict) and existing.get("version") == 2:
+                        raise ValueError("排版格式已升级，请刷新页面后使用排版格式列表。")
                     write_yaml(layout_defaults_path, value)
                     return jsonify(ok=True, message="已保存为默认排版，下次新生成时自动应用。")
                 if request.method == "DELETE":
-                    layout_defaults_path.unlink(missing_ok=True)
+                    try:
+                        collection = load_formats(layout_defaults_path)
+                    except ValueError:
+                        collection = None
+                    if collection is not None:
+                        collection["default_id"] = None
+                        write_yaml(layout_defaults_path, collection)
+                    else:
+                        layout_defaults_path.unlink(missing_ok=True)
                     return jsonify(ok=True, message="已清除默认排版；当前草稿保持不变。")
                 value, warning = load_defaults(layout_defaults_path)
                 return jsonify(ok=True, saved=value is not None, message=warning or ("已保存默认排版，新生成时自动应用。" if value else "尚未保存默认排版。"))
@@ -80,6 +91,19 @@ def create_app(root: Path = ROOT, testing: bool = False, *, data_root: Path = No
                 return jsonify(ok=False, error=str(exc)), 400
             except OSError:
                 return jsonify(ok=False, error="默认排版保存或清除失败，原设置保留，请重试。"), 500
+
+    @app.route("/api/layout-formats", methods=["GET", "POST"])
+    def layout_formats():
+        with layout_defaults_lock:
+            try:
+                if request.method == "POST":
+                    value, selected_id = change_formats(layout_defaults_path, request.get_json(silent=True))
+                    return jsonify(ok=True, **present_formats(value), selected_id=selected_id)
+                return jsonify(ok=True, **present_formats(load_formats(layout_defaults_path)))
+            except ValueError as exc:
+                return jsonify(ok=False, error=str(exc)), 400
+            except OSError:
+                return jsonify(ok=False, error="排版格式读写失败，原设置保留，请重试。"), 500
 
     def skill(snapshot=None):
         current = read_yaml(config_path, {"llm": {}, "app": {}})
@@ -262,8 +286,12 @@ def create_app(root: Path = ROOT, testing: bool = False, *, data_root: Path = No
                 current = read_yaml(config_path, {})
                 settings = selection({**payload, "mode": current.get("llm", {}).get("mode", "demo")})
                 current_llm = dict(current.get("llm", {}))
+                if current_llm.get("provider") == "qwen" and current_llm.get("base_url"):
+                    current_llm["qwen_base_url"] = current_llm["base_url"]
                 if current_llm.get("provider", "deepseek") != settings["provider"]:
                     current_llm.pop("base_url", None)
+                    if settings["provider"] == "qwen" and current_llm.get("qwen_base_url"):
+                        current_llm["base_url"] = current_llm["qwen_base_url"]
                 current["llm"] = {**current_llm, **settings}
                 instance = ResumeSkill(current, repository)
                 write_yaml(config_path, current)
@@ -347,7 +375,7 @@ def create_app(root: Path = ROOT, testing: bool = False, *, data_root: Path = No
             elif target:
                 raise ValueError("追加目标格式不正确")
             else:
-                material = current.import_new_material(text, source_ref)
+                material = current.import_new_material(text, source_ref, request.form.get("material_type", "auto"))
                 if material["kind"] == "skill":
                     name = repository.add_skill(material["name"], material["description"], source_ref)
                     focus = "skill:" + name

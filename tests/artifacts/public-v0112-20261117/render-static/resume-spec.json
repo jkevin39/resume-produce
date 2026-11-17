@@ -1,0 +1,195 @@
+{
+  "generation_id": "gen-20261117-001",
+  "language": "zh",
+  "template": "classic",
+  "theme": "blue",
+  "density": "normal",
+  "show_photo": false,
+  "photo": {
+    "width": "25mm",
+    "height": "32mm",
+    "position": "center top"
+  },
+  "style": {
+    "cjk_font": "songti",
+    "font_size": "10.5pt",
+    "line_height": "1.42",
+    "page_padding": "14mm 16mm",
+    "section_gap": "4.2mm",
+    "bullet_gap": ".7mm",
+    "title_color": ""
+  },
+  "profile": {
+    "name": "测试用户",
+    "phone": "13800000000",
+    "email": "test@example.com",
+    "location": "上海",
+    "summary": "求职方向为数据产品实习生。教育背景：本科、信息管理。已选技能包括Python。已选技能包括SQL。已选技能包括Excel。使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。"
+  },
+  "section_titles": {
+    "education": "教育经历",
+    "experience": "实习经历",
+    "projects": "项目经历",
+    "skills": "技能"
+  },
+  "section_order": [
+    "education",
+    "experience",
+    "projects",
+    "skills"
+  ],
+  "education": [
+    {
+      "education_id": "edu_test_001",
+      "school": "测试大学",
+      "degree": "本科",
+      "major": "信息管理",
+      "date": "2023.09–2027.06",
+      "details": "",
+      "canvas_id": "canvas_70121a2d5ec4486ca16b22b964f3e2b2"
+    }
+  ],
+  "experiences": [
+    {
+      "experience_id": "internship_001",
+      "organization": "测试科技有限公司",
+      "title": "数据产品实习生",
+      "date": "2026.01–2026.06",
+      "location": "上海",
+      "bullets": [
+        {
+          "text": "使用 Python 清洗约 2 万条用户反馈，支持问题分类分析。",
+          "evidence_ids": [
+            "ev_feedback_001"
+          ],
+          "canvas_id": "canvas_6263bafbb6374b31ba0d66624a41513c"
+        },
+        {
+          "text": "使用 SQL 汇总产品数据并维护周度指标看板，减少人工整理时间。",
+          "evidence_ids": [
+            "ev_dashboard_001"
+          ],
+          "canvas_id": "canvas_0af3a00ede5546c597dd4c5eee9c8ed9"
+        }
+      ],
+      "canvas_id": "canvas_47fde9d1b5fa4ec395d70b66d9d342e8"
+    }
+  ],
+  "projects": [
+    {
+      "experience_id": "project_001",
+      "organization": "测试知识助手",
+      "title": "产品与开发负责人",
+      "date": "2025.09–2025.12",
+      "location": "",
+      "bullets": [
+        {
+          "text": "基于 Python 与大模型 API 搭建问答原型，组织 12 名同学试用并收集反馈。",
+          "evidence_ids": [
+            "ev_rag_001"
+          ],
+          "canvas_id": "canvas_0477306fd59f4012850c1e844eb3648f"
+        }
+      ],
+      "canvas_id": "canvas_93c1ba4e76d948e1926a84beaa315311"
+    }
+  ],
+  "skills": [
+    {
+      "name": "Python",
+      "description": "",
+      "evidence_ids": [
+        "ev_feedback_001"
+      ],
+      "user_confirmed": false,
+      "canvas_id": "canvas_725618a9274d4b76b75113110e3fd35a"
+    },
+    {
+      "name": "SQL",
+      "description": "",
+      "evidence_ids": [
+        "ev_dashboard_001"
+      ],
+      "user_confirmed": false,
+      "canvas_id": "canvas_e38a0479a187436bb45d0edfb180f039"
+    },
+    {
+      "name": "Excel",
+      "description": "",
+      "evidence_ids": [],
+      "user_confirmed": true,
+      "canvas_id": "canvas_a500108ec3ff4c078cce6a4d6797e092"
+    }
+  ],
+  "custom_bullets": [],
+  "layout": {
+    "version": 2,
+    "sections": [
+      {
+        "canvas_id": "canvas_69b41bd3f15444829ac0f45a304c90db",
+        "section": "education",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_70121a2d5ec4486ca16b22b964f3e2b2"
+          }
+        ],
+        "kind": "education",
+        "title": "教育经历",
+        "span": 12
+      },
+      {
+        "canvas_id": "canvas_888cb616db704f94bb21e33544558482",
+        "section": "experience",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_47fde9d1b5fa4ec395d70b66d9d342e8",
+            "bullets": [
+              "canvas_6263bafbb6374b31ba0d66624a41513c",
+              "canvas_0af3a00ede5546c597dd4c5eee9c8ed9"
+            ]
+          }
+        ],
+        "kind": "experience",
+        "title": "实习经历",
+        "span": 12
+      },
+      {
+        "canvas_id": "canvas_5607c1330f8545a8b54e079a28cff114",
+        "section": "projects",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_93c1ba4e76d948e1926a84beaa315311",
+            "bullets": [
+              "canvas_0477306fd59f4012850c1e844eb3648f"
+            ]
+          }
+        ],
+        "kind": "projects",
+        "title": "项目经历",
+        "span": 12
+      },
+      {
+        "canvas_id": "canvas_45498634f67044d6bc6840de54839f84",
+        "section": "skills",
+        "hidden": false,
+        "items": [
+          {
+            "canvas_id": "canvas_725618a9274d4b76b75113110e3fd35a"
+          },
+          {
+            "canvas_id": "canvas_e38a0479a187436bb45d0edfb180f039"
+          },
+          {
+            "canvas_id": "canvas_a500108ec3ff4c078cce6a4d6797e092"
+          }
+        ],
+        "kind": "skills",
+        "title": "技能",
+        "span": 12
+      }
+    ]
+  }
+}

@@ -22,3 +22,15 @@ Python 共渲染 85 次，只保留 2 组精确 HTML + ResumeSpec；初始化冒
 - [正式 HTML](artifacts/public-source-20260928/render-static/resume.html) / [ResumeSpec](artifacts/public-source-20260928/render-static/resume-spec.json)
 
 首次导出验证暴露一个测试辅助模块漏包及两项沙箱端口限制；补齐模块并允许本机临时端口后，上述完整回归通过。未执行新的真实模型 API、浏览器人工验收、原生应用人工体验或另一台 Mac 首次安装。个人资料标记与常见凭据模式检查不是完整安全审计。
+
+
+## v0.11.2 公开更新（2026-11-17）
+
+在独立发布副本执行：Python 135 项通过（0 failures、0 errors），JavaScript 20 项通过。Python 共 87 次渲染，仅保留 2 组精确 HTML + ResumeSpec；全部测试日志保留。本轮未调用真实模型、未重跑浏览器/OCR 或另一台 Mac 首次安装，原有未完成质量与人工 Gate 保持开放。
+
+发布内容为 Flask 应用、排版格式管理、材料导入、界面精简和 Qwen 调用修正，以及对应离线测试和说明。
+
+- [Python 汇总](artifacts/public-v0112-20261117/summary.json) / [完整日志](artifacts/public-v0112-20261117/test-results.txt)
+- [JavaScript 日志](artifacts/public-v0112-20261117/js-results.txt)
+- [可编辑 HTML](artifacts/public-v0112-20261117/render-editable/resume.html) / [Spec](artifacts/public-v0112-20261117/render-editable/resume-spec.json)
+- [正式 HTML](artifacts/public-v0112-20261117/render-static/resume.html) / [Spec](artifacts/public-v0112-20261117/render-static/resume-spec.json)

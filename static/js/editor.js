@@ -10,7 +10,7 @@
   const state=()=>({spec,custom_css:$('custom-css').value,selection:bookmark || {id:selectedId,mode}});
   const history=new M.History(state());
   function error(message='') { $('errors').hidden=!message; $('errors').textContent=message; }
-  function changed() { dirty=true;revision++;$('save-status').textContent='有未保存修改';$('save-status').classList.add('dirty');historyControls(); }
+  function changed() { syncFormats();dirty=true;revision++;$('save-status').textContent='有未保存修改';$('save-status').classList.add('dirty');historyControls(); }
   function historyControls() {
     const pending=JSON.stringify([spec,$('custom-css').value])!==JSON.stringify([history.present.spec,history.present.custom_css]);
     $('undo').disabled=busy || (!pending && !history.past.length);
@@ -318,23 +318,57 @@
     node.addEventListener('input',()=>{begin();if(id==='custom-css'){const css=frame.contentDocument?.getElementById('custom-css');if(css)css.textContent=node.value;}else updateStyle();changed();ResumePreview.show(frame,$('layout-status'));});
     node.addEventListener('blur',()=>{commit();scheduleRender();});
   }
-  const defaultsStatus=$('layout-defaults-status');
-  fetch('/api/layout-defaults').then(r=>r.json()).then(data=>{defaultsStatus.textContent=data.message;}).catch(()=>{defaultsStatus.textContent='默认排版状态读取失败，可重试保存。';});
-  async function saveDefaults(clear=false) {
+  const defaultsStatus=$('layout-defaults-status'), formatSelect=$('layout-format');
+  let formats={items:[],default_id:null}, selectedFormat='', formatsLoaded=false;
+  const formatSettings=()=>({theme:spec.theme,density:spec.density,style:JSON.parse(JSON.stringify(spec.style))});
+  const sameSettings=(a,b)=>a.theme===b.theme && a.density===b.density && Object.keys(a.style).every(k=>a.style[k]===b.style[k]);
+  function syncFormats() {
+    if(!formatsLoaded)return;
+    const current=formatSettings(), selected=formats.items.find(x=>x.id===selectedFormat);
+    const match=formats.items.find(x=>sameSettings(x.settings,current));
+    if(!selectedFormat && match){selectedFormat=match.id;$('layout-format-name').value=match.custom_name;}
+    formatSelect.replaceChildren(new Option('当前排版',''));
+    for(const item of formats.items) {
+      const modified=item.id===selectedFormat && !sameSettings(item.settings,current);
+      formatSelect.add(new Option(item.name+(item.id===formats.default_id?'（默认）':'')+(modified?' · 已修改':''),item.id));
+    }
+    formatSelect.value=selectedFormat;
+    formatSelect.title=formatSelect.selectedOptions[0]?.textContent || '';
+    $('layout-format-name').placeholder='例如：我的紧凑版（可留空）';
+  }
+  async function loadFormats() {
+    try {const r=await fetch('/api/layout-formats'),data=await r.json();if(!r.ok)throw Error(data.error);formats=data;formatsLoaded=true;syncFormats();}
+    catch(e){defaultsStatus.textContent=e.message || '排版格式读取失败，请刷新重试。';}
+  }
+  formatSelect.onchange=()=>{
+    selectedFormat=formatSelect.value;
+    const item=formats.items.find(x=>x.id===selectedFormat);
+    if(item){transaction(()=>{Object.assign(spec,JSON.parse(JSON.stringify(item.settings)));});$('layout-format-name').value=item.custom_name;}
+    syncFormats();
+  };
+  async function saveFormat(action) {
     if(busy || composing)return;
-    if(!clear){updateStyle();commit();}
-    freeze(true);
+    if(['update','delete','default'].includes(action) && !selectedFormat){defaultsStatus.textContent='请先选择一个格式。';return;}
+    if(action==='delete' && !confirm('删除此排版格式？已有草稿和历史保持不变。'))return;
+    updateStyle();commit();freeze(true);
     try {
       await ready;
-      const response=await fetch('/api/layout-defaults', {method:clear?'DELETE':'PUT',headers:{'Content-Type':'application/json'},
-        ...(clear?{}:{body:JSON.stringify({theme:spec.theme,density:spec.density,style:spec.style})})});
-      const data=await response.json();
-      if(!response.ok)throw new Error(data.error || '操作失败，请重试。');
-      defaultsStatus.textContent=data.message + (!clear && $('custom-css').value.trim()?' 当前自定义 CSS 的覆盖效果未纳入默认排版。':'');
+      const response=await fetch('/api/layout-formats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action,id:selectedFormat,custom_name:$('layout-format-name').value,settings:formatSettings(),make_default:$('layout-format-default').checked})});
+      const data=await response.json();if(!response.ok)throw Error(data.error || '保存失败');
+      formats=data;formatsLoaded=true;
+      selectedFormat=action==='delete'?'':(data.selected_id || selectedFormat);
+      syncFormats();
+      const saved=formats.items.find(x=>x.id===selectedFormat);
+      $('layout-format-name').value=saved?.custom_name || '';
+      defaultsStatus.textContent=action==='delete'?'已删除格式。':action==='clear_default'?'新生成将使用程序默认。':action==='default'?'已设为新生成默认。':'已保存格式。';
     }catch(e){defaultsStatus.textContent=e.message;}finally{freeze(false);}
   }
-  $('save-layout-defaults').onclick=()=>saveDefaults();
-  $('clear-layout-defaults').onclick=()=>saveDefaults(true);
+  $('save-layout-defaults').onclick=()=>saveFormat('create');
+  $('update-layout-format').onclick=()=>saveFormat('update');
+  $('default-layout-format').onclick=()=>saveFormat('default');
+  $('delete-layout-format').onclick=()=>saveFormat('delete');
+  $('clear-layout-defaults').onclick=()=>saveFormat('clear_default');
+  loadFormats();
   $('reset-css').onclick=()=>transaction(()=>{$('custom-css').value='';});
   $('restore-css').onclick=()=>transaction(()=>{$('custom-css').value=config.custom_css;});
   document.querySelectorAll('[data-refresh]').forEach(button=>button.onclick=async()=>{

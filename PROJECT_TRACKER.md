@@ -1,14 +1,14 @@
 # 公开源码预览版状态
 
-最后更新：2026-09-28
+最后更新：2026-11-17
 
-当前版本基于 v0.11.1，面向 macOS 单用户本地使用。
+当前版本基于 v0.11.2，面向 macOS 单用户本地使用。
 
 | 项目 | 状态 |
 | --- | --- |
 | 履历库、JD 匹配、中文草稿、编辑、导出与历史版本 | 已实现 |
 | 空白初始化、独立合成 demo、Key 自行配置 | 初始化与 demo 通过；新用户 Key 配置待首次安装试用 |
-| Python 与 JavaScript 离线回归 | 独立源码包 123 Python / 20 JS 通过 |
+| Python 与 JavaScript 离线回归 | v0.11.2 发布副本 135 Python / 20 JS 通过 |
 | 所有服务商与模型的真实调用 | 未全部验证 |
 | 完整多经历排序与文字质量矩阵 | 待补齐 |
 | 原生应用菜单、退出与首次安装人工体验 | 待完成 |
@@ -35,3 +35,7 @@
 | 2026-09-28 | 准备公开源码包、首次使用文档、数据流说明、MIT 许可与合成演示；独立副本 123 Python / 20 JS、初始化检查通过，保留两组 HTML + Spec。GitHub 发布、另一台 Mac 首次使用及原有质量 Gate 保持开放。 |
 
 | 2026-09-28 | 已创建公开仓库并推送首次提交 `4d6694d`，共 128 文件；另一台 Mac 首次安装及原有质量 Gate 保持开放。 |
+
+| 2026-11-17 | v0.11.2 公开更新：多套排版格式、材料导入、界面精简和 Qwen 修复；独立副本 135 Python / 20 JS 通过。 |
+
+本次 87 次渲染留两组：[可编辑 HTML](tests/artifacts/public-v0112-20261117/render-editable/resume.html) / [Spec](tests/artifacts/public-v0112-20261117/render-editable/resume-spec.json)、[正式 HTML](tests/artifacts/public-v0112-20261117/render-static/resume.html) / [Spec](tests/artifacts/public-v0112-20261117/render-static/resume-spec.json)。完整结果见 [验收](tests/ACCEPTANCE.md)。

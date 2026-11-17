@@ -61,6 +61,8 @@ def validate_extraction(value: Any) -> dict[str, Any]:
             _text(fact.get(key), f"structured_fact.{key}")
         if not all(isinstance(x, str) for x in _list(fact, "skills", "structured_fact")):
             raise ValueError("structured_fact.skills 必须是字符串数组")
+        for name in fact["skills"]:
+            validate_skill_name(name)
     return data
 
 
@@ -214,3 +216,12 @@ def validate_skill_descriptions(value, sources):
             raise ValueError("技能描述包含来源未支持的工具、数字或熟练度")
         result[name] = text
     return result
+
+
+def validate_skill_name(name):
+    if not isinstance(name, str) or not name.strip():
+        raise ValueError('技能名称不能为空')
+    # Reject sentence-shaped labels without truncating legitimate multiword names.
+    if len(name) > 80 or any(c in name for c in '\n\r。；;，！？') or re.match(r'^(负责|任期内|协助|参与了|完成了)', name):
+        raise ValueError('技能标签应为工具或能力名称，不能是职责全文；请明确材料类型后重试')
+    return name

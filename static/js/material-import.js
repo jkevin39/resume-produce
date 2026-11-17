@@ -9,6 +9,8 @@
   if (!form) return;
   const submitButton = form.querySelector('button[type="submit"]');
   let pending = false;
+  const target=form.elements.target_object, type=form.elements.material_type;
+  target.addEventListener('change',()=>{type.disabled=Boolean(target.value);});
 
   const status = document.createElement('p');
   status.setAttribute('role', 'status');
@@ -63,6 +65,11 @@
       }
       const block = window.ResumeLibrary.update(result);
       form.reset();
+      // Keep the explicit destination for consecutive additions; reset OCR/text only.
+      const target=form.elements.target_object;
+      if([...target.options].some(x=>x.value===body.get('target_object')))target.value=body.get('target_object');
+      form.elements.material_type.value=body.get('material_type') || 'auto';
+      form.elements.material_type.disabled=Boolean(target.value);
       if (block) {
         block.open = true;
         block.scrollIntoView({behavior: 'smooth', block: 'nearest'});

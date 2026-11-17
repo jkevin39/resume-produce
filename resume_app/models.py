@@ -81,6 +81,7 @@ def request_body(settings, max_tokens, messages):
         if provider == "qwen":
             body["enable_thinking"] = thinking
             if thinking:
+                body["thinking_budget"] = 1024
                 # Qwen Plus JSON mode only supports non-thinking; validate the
                 # prompted JSON answer through the same strict workflow validators.
                 body.pop("response_format")

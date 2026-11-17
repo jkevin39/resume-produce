@@ -13,7 +13,7 @@ import requests
 from .ordering import catalog, validate_order, ordered, demo_order
 from .education_match import demo_education_matches, demo_summary
 from .models import PROVIDERS, selection, request_body, resolve_base_url
-from .llm_validation import validate_extraction, validate_generated_spec, validate_jd_analysis, validate_match_report, validate_skill_descriptions
+from .llm_validation import validate_skill_name, validate_extraction, validate_generated_spec, validate_jd_analysis, validate_match_report, validate_skill_descriptions
 from .skill_selection import select_skills
 from .prompts import ANALYZE_JD_PROMPT, BUILD_RESUME_SPEC_PROMPT, EXTRACT_EXPERIENCE_PROMPT, MATCH_EVIDENCE_PROMPT, PROMPT_VERSION, IMPORT_MATERIAL_PROMPT, MERGE_SKILL_PROMPT, SKILL_DESCRIPTION_PROMPT
 
@@ -83,17 +83,31 @@ class ResumeSkill:
         value["source_refs"] = [source_ref]
         return value
 
-    def import_new_material(self, text, source_ref):
+    def import_new_material(self, text, source_ref, material_type="auto"):
+        if material_type == "auto" and re.match(r"^\s*技能[：:]", text):
+            material_type = "skill"
+        if material_type not in {"auto", "experience", "project", "skill"}:
+            raise ValueError("材料类型无效")
+        if material_type in {"experience", "project"}:
+            experience = self.extract_experience(text, source_ref)
+            experience["type"] = material_type
+            return {"kind": "experience", "experience": experience}
         if self.demo_mode:
             lines = [x.strip() for x in text.splitlines() if x.strip()]
             if any(re.match(r"技能[：:]", x) for x in lines[1:]):
                 raise ValueError("请拆分后分次导入，一次只导入一个对象")
-            if lines and re.match(r"技能[：:]", lines[0]):
-                value = lines[0].split(":" if ":" in lines[0] else "：", 1)[1].strip()
-                parts = re.split(r"[，,:：\s]", value, maxsplit=1)
+            if lines and material_type == "skill":
+                value = re.sub(r"^技能[：:]", "", lines[0]).strip()
+                parts = re.split(r"[，,:：。]", value, maxsplit=1)
+                validate_skill_name(parts[0])
                 return {"kind": "skill", "name": parts[0], "description": "，".join(parts[1:] + lines[1:])}
             return {"kind": "experience", "experience": self.extract_experience(text, source_ref)}
-        value = self._chat_json(IMPORT_MATERIAL_PROMPT, text, "材料识别与整理")
+        prompt = IMPORT_MATERIAL_PROMPT
+        if material_type == "skill":
+            prompt += '\n本次用户已明确指定单项技能。只可返回 {"kind":"skill","name":"原技能名","description":"相关用法"}；确实包含多个独立对象时返回 mixed。不得改成经历。'
+        value = self._chat_json(prompt, text, "材料识别与整理")
+        if material_type == "skill" and value.get("kind") != "skill":
+            raise ValueError("未识别为单项技能，请检查材料或改用经历类型")
         if value.get("kind") == "experience":
             experience = self._validate(validate_extraction, value.get("experience"))
             experience["source_refs"] = [source_ref]
@@ -101,6 +115,7 @@ class ResumeSkill:
         if value.get("kind") == "skill":
             if not isinstance(value.get("name"), str) or not value["name"].strip() or not isinstance(value.get("description"), str):
                 raise LLMError("output", "技能名称或描述格式不正确")
+            self._validate(validate_skill_name, value["name"])
             return value
         raise ValueError("请拆分后分次导入；技能材料请明确已经掌握的能力")
 
@@ -244,6 +259,9 @@ class ResumeSkill:
         if not key:
             raise LLMError("credentials", f"未配置 {self.provider['name']} 密钥（{self.provider['env']}），请配置后重启服务。")
         started = time.monotonic()
+        timeout = int(self.config.get("timeout_seconds", 90))
+        if self.settings["provider"] == "qwen" and self.settings["thinking"]:
+            timeout = max(timeout, 180)
         try:
             response = requests.post(
                 f"{self.base_url}/chat/completions",
@@ -251,7 +269,7 @@ class ResumeSkill:
                 json=request_body(self.settings, int(self.config.get("max_tokens", 8192)),
                     [{"role": "system", "content": system_prompt + "\n请只输出 JSON 对象。"},
                      {"role": "user", "content": user_text}]),
-                timeout=int(self.config.get("timeout_seconds", 90)),
+                timeout=timeout,
             )
         except requests.Timeout as exc:
             raise LLMError("output", "请求超时，请手工重试") from exc
@@ -260,11 +278,12 @@ class ResumeSkill:
         elapsed = round(time.monotonic() - started, 3)
         status = response.status_code
         if status in {401, 402}:
-            raise LLMError("credentials", f"{self.provider['name']} 返回 HTTP {status}")
+            raise LLMError("credentials", f"{self.provider['name']} 返回 HTTP {status}，请核对密钥及其地域/业务空间，或检查余额。")
         if status in {429, 500, 502, 503, 504}:
             raise LLMError("busy", f"{self.provider['name']} 返回 HTTP {status}，请稍后手工重试")
         if status >= 400:
-            raise LLMError("configuration", f"{self.provider['name']} 返回 HTTP {status}")
+            hints = {403: "请检查模型访问权限或账户额度。", 404: "请核对服务地址和模型名称。", 400: "请核对模型参数与思考模式是否受支持。"}
+            raise LLMError("configuration", f"{self.provider['name']} 返回 HTTP {status}，" + hints.get(status, "请检查服务配置。"))
         try:
             payload = response.json()
             choice = payload["choices"][0]

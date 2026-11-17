@@ -8,13 +8,14 @@
   <div class="grid">
     <section class="card material-card">
       <h2>履历材料</h2>
-      <p class="muted">新建时请明确：实习经历——公司、岗位、时间、地点；项目经历——项目名称、角色、时间、地点；技能——技能名称、文字描述。一次导入一个对象。</p>
+      <p class="muted">一次导入一段经历、一个项目或一项技能。</p>
       <form method="post" id="material-import-form" data-loading-text="正在拆解材料并写入履历库，请稍候。" action="{{ url_for('import_profile') }}" enctype="multipart/form-data">
         <label for="source_text">材料正文</label><textarea id="source_text" name="source_text" placeholder="示例：某公司 数据分析实习生&#10;- 使用 Python 清洗 2 万条反馈……"></textarea>
         {% with ocr_kind="material" %}{% include "_jd_ocr.html" %}{% endwith %}
         <label for="source_file">或选择文件</label><input id="source_file" type="file" name="source_file" accept=".txt,.md,.markdown,.yaml,.yml">
+        <label for="material-type">新建材料类型</label><select id="material-type" name="material_type"><option value="auto">自动识别</option><option value="experience">实习经历</option><option value="project">项目经历</option><option value="skill">单项技能</option></select>
         <label for="target-object">选择追加对象</label><select id="target-object" name="target_object">{% include "_material_options.html" %}</select>
-        <p class="muted">默认新建；选择已有对象则追加。追加经历不自动去重，可在履历库编辑或删除重复证据。</p>
+        <p class="muted">选择已有对象可连续追加；重复证据可在履历库删除。</p>
         <p><button type="submit">拆解并写入履历库</button></p>
       </form>
       <form method="post" action="{{ url_for('upload_photo') }}" enctype="multipart/form-data">

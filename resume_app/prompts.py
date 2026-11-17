@@ -1,8 +1,10 @@
 """Versioned prompts for model JSON tasks."""
 
-PROMPT_VERSION = "v0.11.1-fgh"
+PROMPT_VERSION = "v0.11.2"
 
 EXTRACT_EXPERIENCE_PROMPT = r"""
+structured_fact.skills 只写工具、方法、能力的短名称，如 SQL、数据清洗、Microsoft Power BI，不写职责句或量化成果，不截断原始事实。
+
 把用户提供的单段履历材料拆成一个经历和多个独立证据点。只返回一个 JSON 对象，不要 Markdown。
 所有叙述使用中文（技术名词可保留原文）。不得虚构、补全或强化用户没有提供的事实；缺少结果、规模或必要细节时标为 needs_details。
 原材料已有明确“小标题：正文”时，original_fact 与 candidate_zh 均保留小标题及对应正文，不因压缩删去标题。无标题不强加；URL、时间和比例中的冒号不是小标题。多个不同标题优先分别形成证据点，不串位。
@@ -72,15 +74,24 @@ display_order 是用户在 prepare 确认的最终顺序，经历/项目和技�
 """.strip()
 
 
-IMPORT_MATERIAL_PROMPT = EXTRACT_EXPERIENCE_PROMPT + r"""
+IMPORT_MATERIAL_PROMPT = r"""
 先识别材料，仍只调用一次并返回一个 JSON 对象。
-单段经历返回 {"kind":"experience","experience":上述经历对象}（项目也走此分支）。
+公司、岗位、时间、职责、成果构成的叙述优先归为经历/项目，即使反复提及 Python、SQL 等技能也不能归成技能。
+structured_fact.skills 只写短的工具、方法或能力名（如 Python、SQL、数据清洗、Microsoft Power BI），职责句、量化成果、小标题和事实全文留在 original_fact/candidate_zh，不能作为技能名。
+技能 description 只概括该项技能的实际用法，不能照搬整段经历或写入其他技能的独立成果。
+顶层必须有 kind 字段，不得直接输出经历字段。
+单段经历返回 {"kind":"experience","experience":经历对象}（项目也走此分支）。
+经历对象字段：experience_id（占位）、type（experience|project）、organization、title、date、location、source_refs（空数组）、evidence（非空数组）。
+每条 evidence 字段：evidence_id（占位）、original_fact、structured_fact（action、method、scale、result、skills 数组）、candidate_zh、status（confirmed|needs_details）。
+所有叙述使用中文；不得虚构事实；缺少必要细节时标 needs_details。原材料的“小标题：正文”在 original_fact 和 candidate_zh 中保留，数字不改动。
+经历返回示例：{"kind":"experience","experience":{"experience_id":"draft","type":"experience","organization":"合成公司","title":"实习生","date":"","location":"","source_refs":[],"evidence":[{"evidence_id":"draft","original_fact":"数据整理：使用 SQL 整理30份报表。","structured_fact":{"action":"整理报表","method":"SQL","scale":"30份","result":"","skills":["SQL"]},"candidate_zh":"数据整理：使用 SQL 整理30份报表。","status":"confirmed"}]}}
+用户已明确标注“技能：”或选择单项技能时，必须按单项技能处理；工具使用句本身不构成一段任职经历。
 单项技能返回 {"kind":"skill","name":"技能名称","description":"中文描述"}，只优化用户明确提供的能力，不能新增工具、熟练度或成果。尚未掌握/计划学习的技能不得确认为已掌握，返回 kind=unsupported。
 多个独立对象或独立经历加独立技能清单返回 {"kind":"mixed"}；经历正文中提到使用的技术属于经历事实，不算混合材料。
 """
 
 MERGE_SKILL_PROMPT = r"""
-把给定技能的原描述与补充材料整合为一句中文描述。只返回 JSON 对象 {"description":"..."}。
+把给定技能的原描述与补充材料整合为一句中文描述。只取与给定技能直接相关的用法；无关公司、任期、其他工具的职责不要纳入，不照搬经历全文；补充材料无相关内容时保留原描述。只返回 JSON 对象 {"description":"..."}。
 只优化措辞，保留仍有效的事实，不添加材料没有的工具、熟练度、年限、数字或成果；不得把计划学习写成已经掌握。
 """
 

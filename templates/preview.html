@@ -11,7 +11,7 @@
     </div>
     <p>{{ draft.metadata.company }} / {{ draft.metadata.role }}<br>
       <span class="muted">来源：{{ source_label(draft.metadata.parent_generation_id) }}</span></p>
-    <p class="notice">全部文字可直接编辑；正式保存写入新版本 ResumeSpec，不回写履历库。草稿只在内存中，重启服务会丢失未保存内容。</p>
+    <p class="notice">重启服务将丢失未保存的内容。</p>
     <p class="muted">初始资源：{{ '来源 HTML 中的内嵌照片和 CSS' if draft.metadata.parent_generation_id else '创建草稿时的本地照片和 CSS' }}。只在主动更新时重新读取。</p>
 
     <div class="button-row"><button id="undo" type="button" disabled title="撤销（⌘/Ctrl+Z）">撤销</button><button id="redo" type="button" disabled title="重做（⌘/Ctrl+Y 或 ⌘/Ctrl+Shift+Z）">重做</button></div>
@@ -34,6 +34,7 @@
     </details>
     <details class="editor-group">
       <summary>排版与颜色</summary>
+      <label for="layout-format">排版格式</label><select id="layout-format"><option value="">当前排版</option></select>
       <label>主题</label><select id="theme"><option value="blue">蓝色</option><option value="charcoal">炭灰</option><option value="green">绿色</option></select>
       <label>密度</label><select id="density"><option value="normal">标准</option><option value="compact">紧凑</option></select>
       <label for="cjk-font">全文中文字体</label><select id="cjk-font"><option value="songti">宋体</option><option value="heiti">黑体</option><option value="kaiti">楷体</option></select>
@@ -43,8 +44,10 @@
       <label>板块间距</label><input id="section-gap" type="text">
       <label>Bullet 间距</label><input id="bullet-gap" type="text">
       <label>标题色</label><select id="title-color"><option value="">跟随主题</option><option value="#185d9d">蓝色</option><option value="#303640">深灰</option><option value="#18705a">绿色</option><option value="#000000">黑色</option><option value="#800020">酒红</option></select>
-      <div class="button-row"><button type="button" id="save-layout-defaults" class="secondary">保存为默认排版</button><button type="button" id="clear-layout-defaults" class="secondary">清除已存默认排版</button></div>
-      <p class="muted">保存主题、密度、字体、字号、行距、页边距、板块/Bullet 间距与标题色。仅用于下次新生成，不含内容、顺序、照片、局部样式及自定义 CSS；不等于正式保存简历。</p>
+      <label for="layout-format-name">自定义名称</label><input id="layout-format-name" type="text" placeholder="例如：我的紧凑版（可留空）">
+      <label class="checkline"><input id="layout-format-default" type="checkbox" checked> 保存时设为新生成默认</label>
+      <div class="button-row"><button type="button" id="save-layout-defaults" class="secondary">另存为新格式</button><button type="button" id="update-layout-format" class="secondary">更新当前格式</button></div>
+      <div class="button-row"><button type="button" id="default-layout-format" class="secondary">设为默认</button><button type="button" id="clear-layout-defaults" class="secondary">取消默认</button><button type="button" id="delete-layout-format" class="secondary">删除格式</button></div>
       <p class="muted" id="layout-defaults-status" role="status"></p>
     </details>
     <details class="editor-group">

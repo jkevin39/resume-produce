@@ -1,0 +1,28 @@
+✔ removes a bullet without changing its siblings (1.042083ms)
+✔ removes whole experience and skill items (0.395875ms)
+✔ rejects paths that do not point to an array item (0.110042ms)
+✔ new experience restores section; deep copy has independent IDs and content (2.5865ms)
+✔ new skills carry an optional description through copy and keep provenance (0.631334ms)
+✔ section controls mutate layout; invalid selection is a no-op (0.16675ms)
+✔ all repeated object kinds copy independently; clipboard survives source deletion (0.846042ms)
+✔ moving bullets across entries updates both parents; invalid moves preserve state (0.226083ms)
+✔ entry/section width constraints and movement use layout order (0.18025ms)
+✔ one history transaction restores content, IDs, width, CSS; edit after undo clears redo (0.288334ms)
+✔ history retains stable field bookmark and selection direction across undo redo (0.111417ms)
+✔ normal page prints only the supplied resume iframe (1.787459ms)
+✔ overflow cancel leaves content untouched and does not print (0.394334ms)
+✔ overflow confirmation still prints the iframe (0.608084ms)
+✔ broken or missing enabled photos are reported (0.460083ms)
+✔ location alone does not satisfy contact information (0.236375ms)
+✔ deep section copies remap every descendant and style; duplicate kind moves preserve owners (5.147ms)
+✔ custom title and bullets copy, hide and undo with complete independent content (0.935833ms)
+✔ Unicode edits split ranges; inserted plain text inherits no formatting; default clears only selection (10.97025ms)
+✔ font and size overlap independently; reset one property preserves the other (0.173708ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 58.465916
